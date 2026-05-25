@@ -1,5 +1,5 @@
 [deployment]
-image = "internal/internal-frontend:shadc58a736deb86302274957a16b967bda2e3360b9"
+image = "internal/demo-registration-form-demo-internal-frontend:shaeb4aea078f05625a2526622bc66c6fb3c729ccce"
 id = "6123c9c8-e70d-46ca-94a2-2df40ed11995"
 
 [expose_to]

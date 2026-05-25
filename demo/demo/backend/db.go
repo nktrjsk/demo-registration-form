@@ -17,6 +17,8 @@ func mustInitDB() *gorm.DB {
 	dbname := envOr("POSTGRES_DB", "postgres")
 	port := envOr("POSTGRES_PORT", "5432")
 
+	ensureDatabaseExists(host, port, user, password, dbname)
+
 	dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
 		host, port, user, password, dbname)
 
@@ -31,7 +33,14 @@ func mustInitDB() *gorm.DB {
 	}
 	sqlDB.SetMaxOpenConns(5)
 
-	if err := db.AutoMigrate(&models.UserCounter{}); err != nil {
+	if err := db.AutoMigrate(
+		&models.UserCounter{},
+		&models.Attendee{},
+		&models.Meeting{},
+		&models.MeetingAttendance{},
+		&models.MeetingProject{},
+		&models.ProjectUpdate{},
+	); err != nil {
 		log.Fatalf("failed to migrate database: %v", err)
 	}
 
@@ -62,6 +71,58 @@ func mustInitDB() *gorm.DB {
 	}
 
 	return db
+}
+
+// ensureDatabaseExists connects to the default "postgres" database and creates
+// the target database if it does not yet exist. The platform supplies the DB
+// name via POSTGRES_DB but does not always pre-create it for new worktrees.
+func ensureDatabaseExists(host, port, user, password, dbname string) {
+	adminDSN := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=postgres sslmode=disable",
+		host, port, user, password)
+	admin, err := gorm.Open(postgres.Open(adminDSN), &gorm.Config{Logger: nil})
+	if err != nil {
+		log.Printf("ensureDatabaseExists: cannot connect to admin db: %v", err)
+		return
+	}
+	sqlDB, err := admin.DB()
+	if err != nil {
+		return
+	}
+	defer sqlDB.Close()
+
+	var exists bool
+	row := sqlDB.QueryRow("SELECT EXISTS(SELECT 1 FROM pg_database WHERE datname = $1)", dbname)
+	if err := row.Scan(&exists); err != nil {
+		log.Printf("ensureDatabaseExists: probe failed: %v", err)
+		return
+	}
+	if exists {
+		return
+	}
+	// Database names cannot be bound via $1 in CREATE DATABASE; sanitize by
+	// allow-listing identifier chars before interpolating.
+	if !isSafeIdent(dbname) {
+		log.Printf("ensureDatabaseExists: refusing to create db with unsafe name %q", dbname)
+		return
+	}
+	if _, err := sqlDB.Exec("CREATE DATABASE \"" + dbname + "\""); err != nil {
+		log.Printf("ensureDatabaseExists: CREATE DATABASE failed: %v", err)
+		return
+	}
+	log.Printf("ensureDatabaseExists: created database %s", dbname)
+}
+
+func isSafeIdent(s string) bool {
+	if s == "" {
+		return false
+	}
+	for _, r := range s {
+		ok := (r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z') || (r >= '0' && r <= '9') || r == '_'
+		if !ok {
+			return false
+		}
+	}
+	return true
 }
 
 func listGalleryImages(db *gorm.DB) ([]models.GalleryImage, error) {

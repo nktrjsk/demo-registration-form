@@ -104,6 +104,15 @@ func main() {
 	mux.Handle("POST /internal/gallery/upload", app.requireAuth(http.HandlerFunc(app.handleUploadGalleryImage)))
 	mux.Handle("DELETE /internal/gallery/{filename...}", app.requireAuth(http.HandlerFunc(app.handleDeleteGalleryImage)))
 
+	// Meeting routes
+	mux.Handle("GET /internal/attendees", app.requireAuth(http.HandlerFunc(app.handleListAttendees)))
+	mux.Handle("POST /internal/attendees", app.requireAuth(http.HandlerFunc(app.handleCreateAttendee)))
+	mux.Handle("GET /internal/meetings", app.requireAuth(http.HandlerFunc(app.handleListMeetings)))
+	mux.Handle("GET /internal/meetings/{id}", app.requireAuth(http.HandlerFunc(app.handleGetMeeting)))
+	mux.Handle("POST /internal/meetings", app.requireAuth(http.HandlerFunc(app.handleCreateMeeting)))
+	mux.Handle("PUT /internal/meetings/{id}", app.requireAuth(http.HandlerFunc(app.handleUpdateMeeting)))
+	mux.Handle("DELETE /internal/meetings/{id}", app.requireAuth(http.HandlerFunc(app.handleDeleteMeeting)))
+
 	handler := corsMiddleware(mux)
 
 	log.Println("listening on :8080")

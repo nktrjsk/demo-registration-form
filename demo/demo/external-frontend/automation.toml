@@ -1,0 +1,4 @@
+[deployment]
+image = "internal/demo-registration-form-demo-external-frontend:shaeb4aea078f05625a2526622bc66c6fb3c729ccce"
+expose = true
+id = "a5de04c9-5690-4465-ade3-0931df41f621"

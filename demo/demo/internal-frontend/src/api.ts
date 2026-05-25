@@ -79,6 +79,34 @@ export function getTokenInfo(): TokenInfo | null {
   }
 }
 
+// Error raised by the backend client for non-2xx responses. Carries the HTTP
+// status plus the backend's `{"detail": "..."}` message so callers can show a
+// human-readable cause instead of "HTTP 500".
+export class ApiError extends Error {
+  status: number
+  detail?: string
+  constructor(status: number, message: string, detail?: string) {
+    super(message)
+    this.status = status
+    this.detail = detail
+    this.name = 'ApiError'
+  }
+}
+
+async function buildApiError(response: Response): Promise<ApiError> {
+  let detail: string | undefined
+  try {
+    const body = await response.clone().json()
+    if (body && typeof body.detail === 'string') detail = body.detail
+  } catch {
+    // body wasn't JSON — fall through to status text
+  }
+  const message = detail
+    ? detail
+    : `Request failed (${response.status} ${response.statusText || 'error'})`
+  return new ApiError(response.status, message, detail)
+}
+
 // Backend API client
 class BackendClient {
   baseUrl: string | null
@@ -111,7 +139,7 @@ class BackendClient {
     }
 
     if (!response.ok) {
-      throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+      throw await buildApiError(response)
     }
 
     return response.json()
@@ -166,7 +194,7 @@ class BackendClient {
     }
 
     if (!response.ok) {
-      throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+      throw await buildApiError(response)
     }
 
     return response.json()

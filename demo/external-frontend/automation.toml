@@ -1,4 +1,0 @@
-[deployment]
-image = "internal/external-frontend:shadc58a736deb86302274957a16b967bda2e3360b9"
-expose = true
-id = "a5de04c9-5690-4465-ade3-0931df41f621"
