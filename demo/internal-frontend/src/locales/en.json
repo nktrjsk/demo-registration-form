@@ -20,5 +20,19 @@
   "gallery.delete": "Delete",
   "gallery.empty": "No images yet.",
   "language.en": "English",
-  "language.cs": "Čeština"
+  "language.cs": "Čeština",
+  "schedule.title": "Demo schedule",
+  "schedule.current": "Current",
+  "schedule.weekday": "Weekday",
+  "schedule.startTime": "Start time",
+  "schedule.edit": "Edit",
+  "schedule.save": "Save",
+  "schedule.cancel": "Cancel",
+  "weekday.monday": "Monday",
+  "weekday.tuesday": "Tuesday",
+  "weekday.wednesday": "Wednesday",
+  "weekday.thursday": "Thursday",
+  "weekday.friday": "Friday",
+  "weekday.saturday": "Saturday",
+  "weekday.sunday": "Sunday"
 }

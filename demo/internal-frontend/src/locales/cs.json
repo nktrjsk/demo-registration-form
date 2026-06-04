@@ -20,5 +20,19 @@
   "gallery.delete": "Smazat",
   "gallery.empty": "Zatím žádné obrázky.",
   "language.en": "English",
-  "language.cs": "Čeština"
+  "language.cs": "Čeština",
+  "schedule.title": "Rozvrh dema",
+  "schedule.current": "Aktuálně",
+  "schedule.weekday": "Den v týdnu",
+  "schedule.startTime": "Začátek",
+  "schedule.edit": "Upravit",
+  "schedule.save": "Uložit",
+  "schedule.cancel": "Zrušit",
+  "weekday.monday": "Pondělí",
+  "weekday.tuesday": "Úterý",
+  "weekday.wednesday": "Středa",
+  "weekday.thursday": "Čtvrtek",
+  "weekday.friday": "Pátek",
+  "weekday.saturday": "Sobota",
+  "weekday.sunday": "Neděle"
 }

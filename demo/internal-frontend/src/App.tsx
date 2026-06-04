@@ -1,7 +1,21 @@
 import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import { backend, getUserInfo, getAccessToken, getImageUrl, getTokenInfo, type UserInfo, type TokenInfo } from './api'
+import {
+  backend,
+  getUserInfo,
+  getAccessToken,
+  getImageUrl,
+  getTokenInfo,
+  fetchPublicConfig,
+  fetchSchedule,
+  type UserInfo,
+  type TokenInfo,
+  type MeetingSchedule,
+  type PublicConfig,
+} from './api'
 import './App.css'
+
+const WEEKDAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'] as const
 
 interface RootResponse {
   message: string
@@ -63,6 +77,12 @@ function App() {
   const [gallery, setGallery] = useState<GalleryImage[]>([])
   const [uploading, setUploading] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const [schedule, setSchedule] = useState<MeetingSchedule | null>(null)
+  const [publicConfig, setPublicConfig] = useState<PublicConfig | null>(null)
+  const [editingSchedule, setEditingSchedule] = useState(false)
+  const [draftWeekday, setDraftWeekday] = useState(0)
+  const [draftStartTime, setDraftStartTime] = useState('15:00')
+  const [scheduleError, setScheduleError] = useState<string | null>(null)
 
   useEffect(() => {
     backend.get<RootResponse>('/')
@@ -84,6 +104,9 @@ function App() {
     getAccessToken()
       .then(() => setTokenInfo(getTokenInfo()))
       .catch(() => {})
+
+    fetchSchedule().then(setSchedule).catch(err => console.error('Failed to fetch schedule:', err))
+    fetchPublicConfig().then(setPublicConfig).catch(err => console.error('Failed to fetch config:', err))
   }, [])
 
   useEffect(() => {
@@ -140,6 +163,30 @@ function App() {
     i18n.changeLanguage(e.target.value)
   }
 
+  const isAdmin = !!(user?.groups && publicConfig && user.groups.includes(publicConfig.admin_group))
+
+  const beginEditSchedule = () => {
+    if (!schedule) return
+    setDraftWeekday(schedule.weekday)
+    setDraftStartTime(schedule.start_time)
+    setScheduleError(null)
+    setEditingSchedule(true)
+  }
+
+  const saveSchedule = async () => {
+    setScheduleError(null)
+    try {
+      const updated = await backend.put<MeetingSchedule>('/schedule', {
+        weekday: draftWeekday,
+        start_time: draftStartTime,
+      })
+      setSchedule(updated)
+      setEditingSchedule(false)
+    } catch (err) {
+      setScheduleError(err instanceof Error ? err.message : String(err))
+    }
+  }
+
   return (
     <div className="app">
       <div className="toolbar">
@@ -166,6 +213,45 @@ function App() {
           <button className="sign-out" onClick={() => window.location.href = '/oauth2/sign_out'}>
             {t('userInfo.signOut')}
           </button>
+        </div>
+      )}
+
+      {schedule && (
+        <div className="card">
+          <h2>{t('schedule.title')}</h2>
+          <p>
+            {t('schedule.current')}:{' '}
+            <strong>{t(`weekday.${WEEKDAYS[schedule.weekday]}`)} {schedule.start_time}</strong>
+          </p>
+          {isAdmin && !editingSchedule && (
+            <button onClick={beginEditSchedule}>{t('schedule.edit')}</button>
+          )}
+          {isAdmin && editingSchedule && (
+            <div className="schedule-edit">
+              <label>
+                {t('schedule.weekday')}:{' '}
+                <select
+                  value={draftWeekday}
+                  onChange={e => setDraftWeekday(parseInt(e.target.value, 10))}
+                >
+                  {WEEKDAYS.map((w, i) => (
+                    <option key={w} value={i}>{t(`weekday.${w}`)}</option>
+                  ))}
+                </select>
+              </label>{' '}
+              <label>
+                {t('schedule.startTime')}:{' '}
+                <input
+                  type="time"
+                  value={draftStartTime}
+                  onChange={e => setDraftStartTime(e.target.value)}
+                />
+              </label>{' '}
+              <button onClick={saveSchedule}>{t('schedule.save')}</button>{' '}
+              <button onClick={() => setEditingSchedule(false)}>{t('schedule.cancel')}</button>
+              {scheduleError && <p className="expired">{scheduleError}</p>}
+            </div>
+          )}
         </div>
       )}
 

@@ -2,7 +2,7 @@
 id = "REQ-001"
 parent = ""
 description = "The automation is named 'Demo meeting form'."
-status = "pending"
+status = "pass"
 
 [[requirement]]
 id = "REQ-002"
@@ -50,25 +50,25 @@ status = "pending"
 id = "AI-009"
 parent = "REQ-001"
 description = "The internal-frontend displays 'Demo meeting form' as the visible application title/header."
-status = "pending"
+status = "pass"
 
 [[requirement]]
 id = "AI-010"
 parent = "REQ-002"
 description = "A freshly-deployed automation has its Demo meeting schedule set to Monday 15:00 by default."
-status = "pending"
+status = "pass"
 
 [[requirement]]
 id = "AI-011"
 parent = "REQ-002"
 description = "An admin can change the weekday of future demos via the admin settings UI, and the change persists across reloads and backend restarts."
-status = "pending"
+status = "pass"
 
 [[requirement]]
 id = "AI-012"
 parent = "REQ-002"
 description = "An admin can change the start time of future demos via the admin settings UI, and the change persists across reloads and backend restarts."
-status = "pending"
+status = "pass"
 
 [[requirement]]
 id = "AI-013"

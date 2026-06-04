@@ -79,6 +79,34 @@ export function getTokenInfo(): TokenInfo | null {
   }
 }
 
+// --- Public (unauthenticated) backend endpoints ---
+
+export interface PublicConfig {
+  admin_group: string
+  allowed_group: string
+}
+
+export async function fetchPublicConfig(): Promise<PublicConfig> {
+  const base = getAutomationUrl('backend')
+  if (!base) throw new Error('Backend URL not configured')
+  const r = await fetch(`${base}/public/config`)
+  if (!r.ok) throw new Error(`HTTP ${r.status}`)
+  return r.json()
+}
+
+export interface MeetingSchedule {
+  weekday: number
+  start_time: string
+}
+
+export async function fetchSchedule(): Promise<MeetingSchedule> {
+  const base = getAutomationUrl('backend')
+  if (!base) throw new Error('Backend URL not configured')
+  const r = await fetch(`${base}/public/schedule`)
+  if (!r.ok) throw new Error(`HTTP ${r.status}`)
+  return r.json()
+}
+
 // Backend API client
 class BackendClient {
   baseUrl: string | null

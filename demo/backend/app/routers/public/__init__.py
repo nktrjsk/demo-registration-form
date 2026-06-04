@@ -8,4 +8,4 @@ from fastapi import APIRouter
 router = APIRouter()
 
 # Import sub-modules so their routes are registered on the router.
-from app.routers.public import root, gallery  # noqa: E402, F401
+from app.routers.public import root, gallery, schedule, config  # noqa: E402, F401

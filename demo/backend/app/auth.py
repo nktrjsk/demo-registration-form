@@ -20,6 +20,8 @@ ALLOWED_GROUP = os.environ.get("BITSWAN_ALLOWED_GROUP")
 if not ALLOWED_GROUP:
     raise RuntimeError("BITSWAN_ALLOWED_GROUP is not set — cannot verify group membership")
 
+ADMIN_GROUP = os.environ.get("BITSWAN_ADMIN_GROUP", f"{ALLOWED_GROUP}/admin")
+
 
 async def _get_jwks_keys() -> list[dict]:
     """Fetch and cache JWKS public keys from Keycloak."""
@@ -93,3 +95,18 @@ def get_username(claims: dict) -> str:
 
 def get_username_from_request(request: Request) -> str:
     return get_username(request.state.claims)
+
+
+def is_admin_claims(claims: dict) -> bool:
+    return ADMIN_GROUP in claims.get("group_membership", [])
+
+
+async def require_admin(
+    request: Request,
+    _: None = Depends(require_auth),
+):
+    if not is_admin_claims(request.state.claims):
+        raise HTTPException(
+            status_code=403,
+            detail=f"Admin role required (group: {ADMIN_GROUP})",
+        )

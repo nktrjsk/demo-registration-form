@@ -5,6 +5,10 @@ import react from '@vitejs/plugin-react'
 // and is consumed here for the dev server's `allowedHosts` list. In production
 // the build doesn't run a server so the value is unused.
 const gitopsDomain = process.env.BITSWAN_GITOPS_DOMAIN
+const automationUrl = process.env.BITSWAN_AUTOMATION_URL
+const dockerHostAlias = automationUrl
+  ? new URL(automationUrl).hostname.replace('.' + gitopsDomain, '')
+  : null
 
 export default defineConfig({
   plugins: [react()],
@@ -16,6 +20,9 @@ export default defineConfig({
   server: {
     host: '0.0.0.0',
     port: 8080,
-    allowedHosts: gitopsDomain ? ['.' + gitopsDomain] : [],
+    allowedHosts: [
+      ...(gitopsDomain ? ['.' + gitopsDomain] : []),
+      ...(dockerHostAlias ? [dockerHostAlias] : []),
+    ],
   },
 })
