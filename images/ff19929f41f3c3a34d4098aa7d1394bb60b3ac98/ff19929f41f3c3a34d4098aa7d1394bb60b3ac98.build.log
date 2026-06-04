@@ -1,0 +1,56 @@
+Build started at 2026-06-04T16:52:26.075818
+Step 1/9 : FROM node:20-alpine
+ ---> fb4cd12c85ee
+Step 2/9 : RUN npm install -g serve
+ ---> Running in 58908cf18a45
+
+added 85 packages in 3s
+
+26 packages are looking for funding
+  run `npm fund` for details
+[91mnpm notice
+npm notice New major version of npm available! 10.8.2 -> 11.16.0
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.16.0
+npm notice To update run: npm install -g npm@11.16.0
+npm notice
+[0m ---> Removed intermediate container 58908cf18a45
+ ---> dd4845171024
+Step 3/9 : WORKDIR /deps
+ ---> Running in 13ed62143bff
+ ---> Removed intermediate container 13ed62143bff
+ ---> 3ce787b439d8
+Step 4/9 : COPY package.json ./
+ ---> 23f906f7f1bf
+Step 5/9 : RUN npm install
+ ---> Running in 9b657a0d20c0
+
+added 158 packages, and audited 159 packages in 12s
+
+34 packages are looking for funding
+  run `npm fund` for details
+
+2 moderate severity vulnerabilities
+
+To address all issues (including breaking changes), run:
+  npm audit fix --force
+
+Run `npm audit` for details.
+ ---> Removed intermediate container 9b657a0d20c0
+ ---> d2139c70bfa2
+Step 6/9 : WORKDIR /app
+ ---> Running in ec88e42dcb89
+ ---> Removed intermediate container ec88e42dcb89
+ ---> 3114496d2b08
+Step 7/9 : COPY entrypoint.sh /entrypoint.sh
+ ---> 7ff1381bb216
+Step 8/9 : RUN chmod +x /entrypoint.sh
+ ---> Running in 75c9466804bc
+ ---> Removed intermediate container 75c9466804bc
+ ---> 1b44910afa09
+Step 9/9 : ENTRYPOINT ["/entrypoint.sh"]
+ ---> Running in aead75aa0508
+ ---> Removed intermediate container aead75aa0508
+ ---> 8f55d9f4a31e
+Successfully built 8f55d9f4a31e
+Successfully tagged internal/demo-meeting-form-demo-internal-frontend:shaff19929f41f3c3a34d4098aa7d1394bb60b3ac98
+Build completed successfully at 2026-06-04T16:53:02.196880
