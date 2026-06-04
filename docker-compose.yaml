@@ -14,7 +14,7 @@ services:
       BITSWAN_DEPLOYMENT_CONTEXT: demo-wt-demo-live-dev
       BITSWAN_DEPLOYMENT_ID: backend-wt-demo-demo-live-dev
       BITSWAN_DEPLOY_CHECKSUM: live-dev
-      BITSWAN_DEPLOY_TIME: '2026-06-04T17:13:49.654415Z'
+      BITSWAN_DEPLOY_TIME: '2026-06-04T17:14:15.233830Z'
       BITSWAN_GITOPS_DOMAIN: nikita-sandbox.bswn.io
       BITSWAN_URL_PREFIX: https://demo-meeting-form-
       BITSWAN_URL_SUFFIX: .nikita-sandbox.bswn.io
@@ -55,7 +55,7 @@ services:
       BITSWAN_DEPLOYMENT_CONTEXT: demo-wt-demo-live-dev
       BITSWAN_DEPLOYMENT_ID: internal-frontend-wt-demo-demo-live-dev
       BITSWAN_DEPLOY_CHECKSUM: live-dev
-      BITSWAN_DEPLOY_TIME: '2026-06-04T17:13:49.965886Z'
+      BITSWAN_DEPLOY_TIME: '2026-06-04T17:14:15.423058Z'
       BITSWAN_GITOPS_DOMAIN: nikita-sandbox.bswn.io
       BITSWAN_URL_PREFIX: https://demo-meeting-form-
       BITSWAN_URL_SUFFIX: .nikita-sandbox.bswn.io
