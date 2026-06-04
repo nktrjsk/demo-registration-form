@@ -1,0 +1,4 @@
+[deployment]
+id = "c1a850c5-baeb-4b07-84f7-2fc43052700b"
+image = "internal/external-frontend:sha85dcfbd49c923c4f2ca387d3041e22062dac4d5a"
+expose = true
