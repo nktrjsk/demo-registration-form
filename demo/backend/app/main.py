@@ -6,7 +6,7 @@ from sqlalchemy import select
 
 from app.database import init_db, shutdown_db, async_session
 from app.models import GalleryImage
-from app import minio_client
+from app import minio_client, scheduler as auto_scheduler
 from app.routers.internal import router as internal_router
 from app.routers.public import router as public_router
 
@@ -43,10 +43,12 @@ async def startup():
     await init_db()
     await minio_client.ensure_bucket()
     await _preseed_gallery()
+    auto_scheduler.start()
 
 
 @app.on_event("shutdown")
 async def shutdown():
+    auto_scheduler.shutdown()
     await shutdown_db()
 
 

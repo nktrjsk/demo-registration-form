@@ -8,13 +8,13 @@ status = "pass"
 id = "REQ-002"
 parent = ""
 description = "There is a single meeting type, 'Demo', with a configurable schedule. Default is Monday 15:00. An admin can change the weekday and start time."
-status = "pending"
+status = "pass"
 
 [[requirement]]
 id = "REQ-003"
 parent = ""
 description = "On the demo day a new Demo meeting instance is automatically created at 00:00 local time (midnight at the start of that day)."
-status = "pending"
+status = "pass"
 
 [[requirement]]
 id = "REQ-004"
@@ -74,25 +74,25 @@ status = "pass"
 id = "AI-013"
 parent = "REQ-002"
 description = "A non-admin user is rejected (UI hidden and API returns 403) when attempting to change the schedule."
-status = "pending"
+status = "pass"
 
 [[requirement]]
 id = "AI-014"
 parent = "REQ-003"
 description = "At 00:00 local time on the configured demo weekday, a new Demo meeting instance is created in the database with that date as its meeting date."
-status = "pending"
+status = "pass"
 
 [[requirement]]
 id = "AI-015"
 parent = "REQ-003"
 description = "The auto-create job is idempotent: running it twice on the same demo day does not produce duplicate meeting instances."
-status = "pending"
+status = "pass"
 
 [[requirement]]
 id = "AI-016"
 parent = "REQ-003"
 description = "If the admin changes the demo weekday, the next auto-created instance occurs at 00:00 on the new weekday (not the old one)."
-status = "pending"
+status = "pass"
 
 [[requirement]]
 id = "AI-017"
