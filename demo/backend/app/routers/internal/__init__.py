@@ -11,4 +11,4 @@ from app.auth import require_auth
 router = APIRouter(dependencies=[Depends(require_auth)])
 
 # Import sub-modules so their routes are registered on the router.
-from app.routers.internal import root, count, gallery, schedule  # noqa: E402, F401
+from app.routers.internal import root, count, gallery, schedule, meeting  # noqa: E402, F401

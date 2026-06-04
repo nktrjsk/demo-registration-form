@@ -20,7 +20,7 @@ status = "pass"
 id = "REQ-004"
 parent = ""
 description = "The internal-frontend uses OIDC to identify the signed-in user by email and presents them a form for the current Demo meeting where they can record (a) their own attendance, (b) one or more projects they worked on, and (c) a free-text description for each project."
-status = "pending"
+status = "pass"
 
 [[requirement]]
 id = "REQ-005"
@@ -74,7 +74,7 @@ status = "pass"
 id = "AI-013"
 parent = "REQ-002"
 description = "A non-admin user is rejected (UI hidden and API returns 403) when attempting to change the schedule."
-status = "pass"
+status = "retest"
 
 [[requirement]]
 id = "AI-014"
@@ -98,31 +98,31 @@ status = "pass"
 id = "AI-017"
 parent = "REQ-004"
 description = "When a signed-in user opens the internal-frontend form, their email is preloaded from the OIDC session and not editable as free text."
-status = "pending"
+status = "pass"
 
 [[requirement]]
 id = "AI-018"
 parent = "REQ-004"
 description = "The form has a control letting the user mark themselves as attending or not attending the current Demo meeting."
-status = "pending"
+status = "pass"
 
 [[requirement]]
 id = "AI-019"
 parent = "REQ-004"
 description = "The form lets the user select one or more projects from the current meeting's project list."
-status = "pending"
+status = "pass"
 
 [[requirement]]
 id = "AI-020"
 parent = "REQ-004"
 description = "For each project the user selects, they can write a free-text description; descriptions are stored per project per user."
-status = "pending"
+status = "pass"
 
 [[requirement]]
 id = "AI-021"
 parent = "REQ-004"
 description = "Submitting the form persists the entry; reopening the form for the same meeting shows the user's previously submitted values."
-status = "pending"
+status = "pass"
 
 [[requirement]]
 id = "AI-022"

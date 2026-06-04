@@ -34,5 +34,18 @@
   "weekday.thursday": "Čtvrtek",
   "weekday.friday": "Pátek",
   "weekday.saturday": "Sobota",
-  "weekday.sunday": "Neděle"
+  "weekday.sunday": "Neděle",
+  "form.title": "Formulář k demu",
+  "form.loading": "Načítám...",
+  "form.noMeeting": "Zatím žádné demo. Další se objeví v nakonfigurovaný den.",
+  "form.meetingDate": "Datum dema",
+  "form.yourEmail": "Tvůj e-mail",
+  "form.attending": "Byl jsem na demu",
+  "form.projects": "Projekty",
+  "form.noProjects": "K tomuto demu zatím nejsou přidány žádné projekty.",
+  "form.leader": "Vedoucí",
+  "form.descriptionPlaceholder": "Na čem jsi pracoval?",
+  "form.save": "Uložit",
+  "form.saving": "Ukládám...",
+  "form.savedAt": "Uloženo v {{time}}"
 }

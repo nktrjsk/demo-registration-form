@@ -2,5 +2,15 @@ from app.models.user_counter import UserCounter
 from app.models.gallery_image import GalleryImage
 from app.models.meeting_schedule import MeetingSchedule
 from app.models.meeting_instance import MeetingInstance
+from app.models.project import Project
+from app.models.meeting_entry import MeetingEntry, ProjectEntry
 
-__all__ = ["UserCounter", "GalleryImage", "MeetingSchedule", "MeetingInstance"]
+__all__ = [
+    "UserCounter",
+    "GalleryImage",
+    "MeetingSchedule",
+    "MeetingInstance",
+    "Project",
+    "MeetingEntry",
+    "ProjectEntry",
+]

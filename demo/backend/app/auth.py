@@ -97,6 +97,14 @@ def get_username_from_request(request: Request) -> str:
     return get_username(request.state.claims)
 
 
+def get_email(claims: dict) -> str:
+    return claims.get("email", "")
+
+
+def get_email_from_request(request: Request) -> str:
+    return get_email(request.state.claims)
+
+
 def is_admin_claims(claims: dict) -> bool:
     return ADMIN_GROUP in claims.get("group_membership", [])
 

@@ -34,5 +34,18 @@
   "weekday.thursday": "Thursday",
   "weekday.friday": "Friday",
   "weekday.saturday": "Saturday",
-  "weekday.sunday": "Sunday"
+  "weekday.sunday": "Sunday",
+  "form.title": "Demo meeting form",
+  "form.loading": "Loading...",
+  "form.noMeeting": "No Demo meeting yet. The next one will appear on the configured demo day.",
+  "form.meetingDate": "Meeting date",
+  "form.yourEmail": "Your email",
+  "form.attending": "I attended this Demo",
+  "form.projects": "Projects",
+  "form.noProjects": "No projects added for this meeting yet.",
+  "form.leader": "Leader",
+  "form.descriptionPlaceholder": "What did you work on?",
+  "form.save": "Save",
+  "form.saving": "Saving...",
+  "form.savedAt": "Saved at {{time}}"
 }

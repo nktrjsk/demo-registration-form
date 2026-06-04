@@ -107,6 +107,29 @@ export async function fetchSchedule(): Promise<MeetingSchedule> {
   return r.json()
 }
 
+export interface MeetingProject {
+  id: number
+  name: string
+  leader: string
+}
+
+export interface CurrentMeeting {
+  id: number
+  meeting_date: string
+  projects: MeetingProject[]
+}
+
+export interface ProjectEntry {
+  project_id: number
+  description: string
+}
+
+export interface MyEntry {
+  user_email: string
+  attended: boolean
+  project_entries: ProjectEntry[]
+}
+
 // Backend API client
 class BackendClient {
   baseUrl: string | null
