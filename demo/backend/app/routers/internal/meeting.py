@@ -7,7 +7,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.requests import Request
 
-from app.auth import get_email_from_request
+from app.auth import get_email_from_request, require_admin
 from app.database import get_db
 from app.models import (
     MeetingInstance,
@@ -180,16 +180,9 @@ async def get_attendees(meeting_id: int, db: AsyncSession = Depends(get_db)):
     }
 
 
-@router.put("/meeting/{meeting_id}/my-entry")
-async def put_my_entry(
-    meeting_id: int,
-    request: Request,
-    payload: dict = Body(...),
-    db: AsyncSession = Depends(get_db),
-):
-    user_email = get_email_from_request(request)
-    if not user_email:
-        raise HTTPException(status_code=400, detail="OIDC session has no email claim")
+async def _apply_entry_update(
+    db: AsyncSession, meeting_id: int, user_email: str, payload: dict
+) -> tuple[MeetingEntry, list[ProjectEntry]]:
     meeting = await db.get(MeetingInstance, meeting_id)
     if meeting is None:
         raise HTTPException(status_code=404, detail="Meeting not found")
@@ -197,7 +190,6 @@ async def put_my_entry(
     attended = bool(payload.get("attended", False))
     raw_entries = payload.get("project_entries", []) or []
 
-    # Upsert MeetingEntry.
     entry = (
         await db.execute(
             select(MeetingEntry).where(
@@ -217,7 +209,6 @@ async def put_my_entry(
     else:
         entry.attended = attended
 
-    # Validate project_ids belong to this meeting.
     valid_project_ids = {
         pid for (pid,) in (
             await db.execute(
@@ -237,7 +228,6 @@ async def put_my_entry(
             )
         incoming[pid] = str(pe.get("description", ""))
 
-    # Replace ProjectEntry rows: delete any not in incoming, upsert the rest.
     existing = (
         await db.execute(
             select(ProjectEntry).where(ProjectEntry.meeting_entry_id == entry.id)
@@ -260,6 +250,49 @@ async def put_my_entry(
             )
 
     await db.commit()
-    # Reload to return the canonical state.
+    return await _load_entry(db, meeting_id, user_email)
+
+
+@router.put("/meeting/{meeting_id}/my-entry")
+async def put_my_entry(
+    meeting_id: int,
+    request: Request,
+    payload: dict = Body(...),
+    db: AsyncSession = Depends(get_db),
+):
+    user_email = get_email_from_request(request)
+    if not user_email:
+        raise HTTPException(status_code=400, detail="OIDC session has no email claim")
+    entry, project_entries = await _apply_entry_update(db, meeting_id, user_email, payload)
+    return {"user_email": user_email, **_entry_to_dict(entry, project_entries)}
+
+
+@router.put(
+    "/meeting/{meeting_id}/entries/{user_email}",
+    dependencies=[Depends(require_admin)],
+)
+async def admin_put_user_entry(
+    meeting_id: int,
+    user_email: str,
+    payload: dict = Body(...),
+    db: AsyncSession = Depends(get_db),
+):
+    """Admin-only: edit any user's attendance + project entries."""
+    if not user_email:
+        raise HTTPException(status_code=422, detail="user_email required")
+    entry, project_entries = await _apply_entry_update(db, meeting_id, user_email, payload)
+    return {"user_email": user_email, **_entry_to_dict(entry, project_entries)}
+
+
+@router.get(
+    "/meeting/{meeting_id}/entries/{user_email}",
+    dependencies=[Depends(require_admin)],
+)
+async def admin_get_user_entry(
+    meeting_id: int,
+    user_email: str,
+    db: AsyncSession = Depends(get_db),
+):
+    """Admin-only: inspect any user's entry without impersonating."""
     entry, project_entries = await _load_entry(db, meeting_id, user_email)
     return {"user_email": user_email, **_entry_to_dict(entry, project_entries)}

@@ -38,7 +38,7 @@ status = "pass"
 id = "REQ-007"
 parent = ""
 description = "Each user can only create/edit their own attendance and their own project entries. An admin role can edit any user's attendance and entries, and can change schedule and other settings."
-status = "pending"
+status = "pass"
 
 [[requirement]]
 id = "REQ-008"
@@ -164,25 +164,25 @@ status = "pass"
 id = "AI-028"
 parent = "REQ-007"
 description = "A non-admin user is rejected (API returns 403, UI hides the controls) when attempting to edit another user's attendance or project entries."
-status = "pending"
+status = "pass"
 
 [[requirement]]
 id = "AI-029"
 parent = "REQ-007"
 description = "An admin user can edit any user's attendance for the current meeting, and the change persists."
-status = "pending"
+status = "pass"
 
 [[requirement]]
 id = "AI-030"
 parent = "REQ-007"
 description = "An admin user can edit any user's project entries (description and project association), and the change persists."
-status = "pending"
+status = "pass"
 
 [[requirement]]
 id = "AI-031"
 parent = "REQ-007"
 description = "Schedule and other admin-only settings endpoints require the admin role and reject non-admin requests with 403."
-status = "pending"
+status = "pass"
 
 [[requirement]]
 id = "AI-032"
