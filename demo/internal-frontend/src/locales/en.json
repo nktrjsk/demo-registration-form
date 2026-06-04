@@ -1,5 +1,5 @@
 {
-  "app.title": "Internal Dashboard",
+  "app.title": "Demo meeting form",
   "app.description": "This is the internal frontend of your BitSwan Internal App. It is protected by OAuth2 — only employees authorized through the BitSwan Automation Operation Center can access it. Use this dashboard to build secure internal tools for your company.",
   "userInfo.title": "User Info",
   "userInfo.email": "Email",

@@ -1,6 +1,6 @@
 [deployment]
 id = "cda6a43c-420a-411d-beb1-8e755d927a86"
-image = "internal/internal-frontend:sha85dcfbd49c923c4f2ca387d3041e22062dac4d5a"
+image = "internal/demo-meeting-form-demo-internal-frontend:shaff19929f41f3c3a34d4098aa7d1394bb60b3ac98"
 
 [expose_to]
 dev = ["/admin"]

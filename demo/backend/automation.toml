@@ -1,6 +1,6 @@
 [deployment]
 id = "ed9161ea-12f1-45fd-b5d2-c411c0cadef1"
-image = "internal/backend:sha0bebde69c7fa98085d09be74d05ee18145831c1b"
+image = "internal/demo-meeting-form-demo-backend:sha8269d38f3de691c1ed1a4247a99777aa681d77dd"
 expose = true
 
 [services.postgres]

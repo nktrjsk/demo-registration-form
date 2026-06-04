@@ -1,5 +1,5 @@
 {
-  "app.title": "Interní dashboard",
+  "app.title": "Demo meeting form",
   "app.description": "Toto je interní frontend vaší BitSwan Internal App. Je chráněn pomocí OAuth2 — přístup mají pouze zaměstnanci autorizovaní přes BitSwan Automation Operation Center. Použijte tento dashboard pro tvorbu bezpečných interních nástrojů vaší společnosti.",
   "userInfo.title": "Informace o uživateli",
   "userInfo.email": "E-mail",
