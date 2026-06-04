@@ -44,7 +44,7 @@ status = "pass"
 id = "REQ-008"
 parent = ""
 description = "There is a separate 'History' tab in the internal-frontend that lists past Demo meetings; opening a past meeting shows its attendees and per-project notes read-only (layout may differ from the live form)."
-status = "pending"
+status = "pass"
 
 [[requirement]]
 id = "AI-009"
@@ -188,22 +188,22 @@ status = "pass"
 id = "AI-032"
 parent = "REQ-008"
 description = "The internal-frontend has a 'History' navigation tab visible to all signed-in users."
-status = "pending"
+status = "pass"
 
 [[requirement]]
 id = "AI-033"
 parent = "REQ-008"
 description = "The History tab lists past Demo meetings, ordered most-recent-first, with the meeting date as the primary label."
-status = "pending"
+status = "pass"
 
 [[requirement]]
 id = "AI-034"
 parent = "REQ-008"
 description = "Selecting a past meeting opens a view showing its attendees and per-project notes."
-status = "pending"
+status = "pass"
 
 [[requirement]]
 id = "AI-035"
 parent = "REQ-008"
 description = "The historical meeting view is read-only for non-admin users; admin users can edit attendees and per-project notes from the history view, and edits persist."
-status = "pending"
+status = "pass"

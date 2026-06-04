@@ -52,5 +52,14 @@
   "form.projectName": "Název projektu",
   "form.projectFieldsRequired": "Vyplň jméno projektu i vedoucího.",
   "form.add": "Přidat",
-  "form.cancel": "Zrušit"
+  "form.cancel": "Zrušit",
+  "tabs.current": "Aktuální",
+  "tabs.history": "Historie",
+  "history.title": "Minulá dema",
+  "history.loading": "Načítám historii...",
+  "history.empty": "Zatím žádná minulá dema.",
+  "history.attendees": "Účastníci",
+  "history.edit": "Upravit",
+  "history.save": "Uložit",
+  "history.cancel": "Zrušit"
 }

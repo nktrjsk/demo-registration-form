@@ -130,6 +130,22 @@ export interface MyEntry {
   project_entries: ProjectEntry[]
 }
 
+export interface MeetingSummary {
+  id: number
+  meeting_date: string
+}
+
+export interface Attendee {
+  email: string
+  attended: boolean
+  project_entries: ProjectEntry[]
+}
+
+export interface MeetingDetails {
+  meeting: CurrentMeeting
+  attendees: Attendee[]
+}
+
 // Backend API client
 class BackendClient {
   baseUrl: string | null

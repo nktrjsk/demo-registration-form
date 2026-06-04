@@ -57,6 +57,89 @@ async def get_current_meeting(db: AsyncSession = Depends(get_db)):
     return {"meeting": _meeting_to_dict(meeting, projects)}
 
 
+@router.get("/meetings")
+async def list_meetings(db: AsyncSession = Depends(get_db)):
+    """All Demo meetings, most-recent first. Used by the History tab."""
+    rows = (
+        await db.execute(
+            select(MeetingInstance).order_by(desc(MeetingInstance.meeting_date))
+        )
+    ).scalars().all()
+    return {
+        "meetings": [
+            {"id": m.id, "meeting_date": m.meeting_date.isoformat()} for m in rows
+        ]
+    }
+
+
+@router.get("/meeting/{meeting_id}/details")
+async def get_meeting_details(meeting_id: int, db: AsyncSession = Depends(get_db)):
+    """Full meeting view: projects + roster-attendees joined with each
+    user's MeetingEntry + ProjectEntries. Used by the History detail view."""
+    meeting = await db.get(MeetingInstance, meeting_id)
+    if meeting is None:
+        raise HTTPException(status_code=404, detail="Meeting not found")
+
+    projects = (
+        await db.execute(
+            select(Project)
+            .where(Project.meeting_instance_id == meeting_id)
+            .order_by(Project.created_at)
+        )
+    ).scalars().all()
+
+    end_of_day = datetime.combine(meeting.meeting_date, time(23, 59, 59))
+    roster_emails = [
+        row[0]
+        for row in (
+            await db.execute(
+                select(UserRoster.email)
+                .where(UserRoster.first_seen_at <= end_of_day)
+                .order_by(UserRoster.first_seen_at)
+            )
+        ).all()
+    ]
+
+    entries = (
+        await db.execute(
+            select(MeetingEntry).where(MeetingEntry.meeting_instance_id == meeting_id)
+        )
+    ).scalars().all()
+    entries_by_email = {e.user_email: e for e in entries}
+    entry_ids = [e.id for e in entries]
+    project_entries = (
+        await db.execute(
+            select(ProjectEntry).where(ProjectEntry.meeting_entry_id.in_(entry_ids))
+        )
+    ).scalars().all() if entry_ids else []
+    pe_by_entry_id: dict[int, list[ProjectEntry]] = {}
+    for pe in project_entries:
+        pe_by_entry_id.setdefault(pe.meeting_entry_id, []).append(pe)
+
+    attendees = []
+    for email in roster_emails:
+        entry = entries_by_email.get(email)
+        if entry is None:
+            attendees.append({"email": email, "attended": False, "project_entries": []})
+        else:
+            pes = pe_by_entry_id.get(entry.id, [])
+            attendees.append(
+                {
+                    "email": email,
+                    "attended": entry.attended,
+                    "project_entries": [
+                        {"project_id": pe.project_id, "description": pe.description}
+                        for pe in pes
+                    ],
+                }
+            )
+
+    return {
+        "meeting": _meeting_to_dict(meeting, list(projects)),
+        "attendees": attendees,
+    }
+
+
 async def _load_entry(
     db: AsyncSession, meeting_id: int, user_email: str
 ) -> tuple[MeetingEntry | None, list[ProjectEntry]]:

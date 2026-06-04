@@ -52,5 +52,14 @@
   "form.projectName": "Project name",
   "form.projectFieldsRequired": "Both project name and leader are required.",
   "form.add": "Add",
-  "form.cancel": "Cancel"
+  "form.cancel": "Cancel",
+  "tabs.current": "Current",
+  "tabs.history": "History",
+  "history.title": "Past Demos",
+  "history.loading": "Loading history...",
+  "history.empty": "No past Demos yet.",
+  "history.attendees": "Attendees",
+  "history.edit": "Edit",
+  "history.save": "Save",
+  "history.cancel": "Cancel"
 }

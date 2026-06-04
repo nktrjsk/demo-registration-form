@@ -10,7 +10,10 @@ import {
   type PublicConfig,
 } from './api'
 import { MeetingForm } from './MeetingForm'
+import { HistoryTab } from './HistoryTab'
 import './App.css'
+
+type Tab = 'current' | 'history'
 
 const WEEKDAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'] as const
 
@@ -42,6 +45,7 @@ function App() {
   const [draftWeekday, setDraftWeekday] = useState(0)
   const [draftStartTime, setDraftStartTime] = useState('15:00')
   const [scheduleError, setScheduleError] = useState<string | null>(null)
+  const [tab, setTab] = useState<Tab>('current')
 
   useEffect(() => {
     getUserInfo().then(setUser).catch(err => console.error('Failed to fetch user info:', err))
@@ -100,7 +104,23 @@ function App() {
         </div>
       )}
 
-      <MeetingForm />
+      <nav className="tabs">
+        <button
+          className={tab === 'current' ? 'tab active' : 'tab'}
+          onClick={() => setTab('current')}
+        >
+          {t('tabs.current')}
+        </button>
+        <button
+          className={tab === 'history' ? 'tab active' : 'tab'}
+          onClick={() => setTab('history')}
+        >
+          {t('tabs.history')}
+        </button>
+      </nav>
+
+      {tab === 'current' && <MeetingForm />}
+      {tab === 'history' && <HistoryTab isAdmin={isAdmin} />}
 
       {schedule && (
         <div className="card">
