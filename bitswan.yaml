@@ -1,1 +1,8 @@
-deployments: {}
+deployments:
+  backend-wt-demo-demo-live-dev:
+    active: true
+    automation_name: backend
+    checksum: live-dev
+    context: wt-demo-demo
+    relative_path: worktrees/demo/demo/backend
+    stage: live-dev
