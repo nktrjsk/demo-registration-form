@@ -13,6 +13,10 @@ export function MeetingForm() {
   const [saving, setSaving] = useState(false)
   const [savedAt, setSavedAt] = useState<Date | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [addingProject, setAddingProject] = useState(false)
+  const [newProjectName, setNewProjectName] = useState('')
+  const [newProjectLeader, setNewProjectLeader] = useState('')
+  const [projectError, setProjectError] = useState<string | null>(null)
 
   useEffect(() => {
     let alive = true
@@ -64,6 +68,26 @@ export function MeetingForm() {
     setDraftEntries(prev => ({ ...prev, [id]: text }))
   }
 
+  const submitNewProject = async () => {
+    setProjectError(null)
+    const name = newProjectName.trim()
+    const leader = newProjectLeader.trim()
+    if (!name || !leader) {
+      setProjectError(t('form.projectFieldsRequired'))
+      return
+    }
+    try {
+      await backend.post(`/meeting/${meeting.id}/projects`, { name, leader })
+      const refreshed = await backend.get<{ meeting: CurrentMeeting | null }>('/meeting/current')
+      if (refreshed.meeting) setMeeting(refreshed.meeting)
+      setNewProjectName('')
+      setNewProjectLeader('')
+      setAddingProject(false)
+    } catch (e) {
+      setProjectError(e instanceof Error ? e.message : String(e))
+    }
+  }
+
   const submit = async () => {
     setSaving(true)
     setError(null)
@@ -103,6 +127,36 @@ export function MeetingForm() {
       </label>
 
       <h3>{t('form.projects')}</h3>
+      {!addingProject && (
+        <button onClick={() => { setAddingProject(true); setProjectError(null) }}>
+          {t('form.addProject')}
+        </button>
+      )}
+      {addingProject && (
+        <div className="add-project">
+          <label>
+            {t('form.projectName')}:{' '}
+            <input
+              type="text"
+              value={newProjectName}
+              onChange={e => setNewProjectName(e.target.value)}
+            />
+          </label>{' '}
+          <label>
+            {t('form.leader')}:{' '}
+            <input
+              type="text"
+              value={newProjectLeader}
+              onChange={e => setNewProjectLeader(e.target.value)}
+            />
+          </label>{' '}
+          <button onClick={submitNewProject}>{t('form.add')}</button>{' '}
+          <button onClick={() => { setAddingProject(false); setProjectError(null) }}>
+            {t('form.cancel')}
+          </button>
+          {projectError && <p className="expired">{projectError}</p>}
+        </div>
+      )}
       {meeting.projects.length === 0 ? (
         <p>{t('form.noProjects')}</p>
       ) : (

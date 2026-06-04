@@ -3,6 +3,7 @@ from datetime import date, datetime, time
 
 from fastapi import Body, Depends, HTTPException
 from sqlalchemy import desc, select, cast, Date
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.requests import Request
 
@@ -102,6 +103,43 @@ async def get_my_entry(
         raise HTTPException(status_code=400, detail="OIDC session has no email claim")
     entry, project_entries = await _load_entry(db, meeting_id, user_email)
     return {"user_email": user_email, **_entry_to_dict(entry, project_entries)}
+
+
+@router.post("/meeting/{meeting_id}/projects")
+async def add_project(
+    meeting_id: int,
+    request: Request,
+    payload: dict = Body(...),
+    db: AsyncSession = Depends(get_db),
+):
+    user_email = get_email_from_request(request)
+    if not user_email:
+        raise HTTPException(status_code=400, detail="OIDC session has no email claim")
+    meeting = await db.get(MeetingInstance, meeting_id)
+    if meeting is None:
+        raise HTTPException(status_code=404, detail="Meeting not found")
+    name = str(payload.get("name", "")).strip()
+    leader = str(payload.get("leader", "")).strip()
+    if not name or not leader:
+        raise HTTPException(status_code=422, detail="name and leader are required")
+
+    proj = Project(
+        meeting_instance_id=meeting_id,
+        name=name,
+        leader=leader,
+        created_by_email=user_email,
+    )
+    db.add(proj)
+    try:
+        await db.commit()
+    except IntegrityError:
+        await db.rollback()
+        raise HTTPException(
+            status_code=409,
+            detail=f"A project named '{name}' already exists for this meeting",
+        )
+    await db.refresh(proj)
+    return _project_to_dict(proj)
 
 
 @router.get("/meeting/{meeting_id}/attendees")

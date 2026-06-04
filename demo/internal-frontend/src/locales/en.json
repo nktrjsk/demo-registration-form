@@ -47,5 +47,10 @@
   "form.descriptionPlaceholder": "What did you work on?",
   "form.save": "Save",
   "form.saving": "Saving...",
-  "form.savedAt": "Saved at {{time}}"
+  "form.savedAt": "Saved at {{time}}",
+  "form.addProject": "+ Add project",
+  "form.projectName": "Project name",
+  "form.projectFieldsRequired": "Both project name and leader are required.",
+  "form.add": "Add",
+  "form.cancel": "Cancel"
 }

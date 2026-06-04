@@ -47,5 +47,10 @@
   "form.descriptionPlaceholder": "Na čem jsi pracoval?",
   "form.save": "Uložit",
   "form.saving": "Ukládám...",
-  "form.savedAt": "Uloženo v {{time}}"
+  "form.savedAt": "Uloženo v {{time}}",
+  "form.addProject": "+ Přidat projekt",
+  "form.projectName": "Název projektu",
+  "form.projectFieldsRequired": "Vyplň jméno projektu i vedoucího.",
+  "form.add": "Přidat",
+  "form.cancel": "Zrušit"
 }

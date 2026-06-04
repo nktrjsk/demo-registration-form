@@ -32,7 +32,7 @@ status = "pass"
 id = "REQ-006"
 parent = ""
 description = "Any signed-in user can add a new project (with a leader name) to the current Demo meeting; the project then appears for everyone to log entries under."
-status = "pending"
+status = "pass"
 
 [[requirement]]
 id = "REQ-007"
@@ -146,19 +146,19 @@ status = "pass"
 id = "AI-025"
 parent = "REQ-006"
 description = "Any signed-in user can submit a new project (with project name and leader name) to the current Demo meeting."
-status = "pending"
+status = "pass"
 
 [[requirement]]
 id = "AI-026"
 parent = "REQ-006"
 description = "A project added by one user becomes immediately visible to all other users on the same meeting (after a reload at most)."
-status = "pending"
+status = "pass"
 
 [[requirement]]
 id = "AI-027"
 parent = "REQ-006"
 description = "Newly added projects are scoped to the meeting they were added to and do not retroactively appear on past meetings."
-status = "pending"
+status = "pass"
 
 [[requirement]]
 id = "AI-028"
