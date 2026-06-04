@@ -6,3 +6,10 @@ deployments:
     context: wt-demo-demo
     relative_path: worktrees/demo/demo/backend
     stage: live-dev
+  internal-frontend-wt-demo-demo-live-dev:
+    active: true
+    automation_name: internal-frontend
+    checksum: live-dev
+    context: wt-demo-demo
+    relative_path: worktrees/demo/demo/internal-frontend
+    stage: live-dev
