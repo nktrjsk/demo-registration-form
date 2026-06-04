@@ -13,3 +13,6 @@ deployments:
     context: wt-demo-demo
     relative_path: worktrees/demo/demo/internal-frontend
     stage: live-dev
+  testing-wt-demo-demo-live-dev:
+    active: true
+    stage: live-dev
