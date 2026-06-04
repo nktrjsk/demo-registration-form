@@ -46,6 +46,8 @@ function App() {
   const [draftStartTime, setDraftStartTime] = useState('15:00')
   const [scheduleError, setScheduleError] = useState<string | null>(null)
   const [tab, setTab] = useState<Tab>('current')
+  const [recreateError, setRecreateError] = useState<string | null>(null)
+  const [recreatedDate, setRecreatedDate] = useState<string | null>(null)
 
   useEffect(() => {
     getUserInfo().then(setUser).catch(err => console.error('Failed to fetch user info:', err))
@@ -65,6 +67,24 @@ function App() {
     setDraftStartTime(schedule.start_time)
     setScheduleError(null)
     setEditingSchedule(true)
+  }
+
+  const recreateTodaysDemo = async () => {
+    setRecreateError(null)
+    setRecreatedDate(null)
+    if (!window.confirm(t('adminTools.recreateConfirm'))) return
+    try {
+      const res = await backend.post<{ id: number; meeting_date: string }>(
+        '/admin/meeting/recreate',
+        {},
+      )
+      setRecreatedDate(res.meeting_date)
+      // MeetingForm reads `/meeting/current` on mount; reloading is the
+      // simplest way to get every panel to pick up the fresh meeting.
+      window.location.reload()
+    } catch (err) {
+      setRecreateError(err instanceof Error ? err.message : String(err))
+    }
   }
 
   const saveSchedule = async () => {
@@ -158,6 +178,20 @@ function App() {
               {scheduleError && <p className="expired">{scheduleError}</p>}
             </div>
           )}
+        </div>
+      )}
+
+      {isAdmin && (
+        <div className="card admin-tools">
+          <h2>{t('adminTools.title')}</h2>
+          <p className="muted">{t('adminTools.description')}</p>
+          <button onClick={recreateTodaysDemo}>
+            {t('adminTools.recreateDemo')}
+          </button>
+          {recreatedDate && (
+            <p className="message">{t('adminTools.recreated', { date: recreatedDate })}</p>
+          )}
+          {recreateError && <p className="expired">{recreateError}</p>}
         </div>
       )}
 

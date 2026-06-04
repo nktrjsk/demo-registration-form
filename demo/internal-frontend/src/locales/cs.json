@@ -61,5 +61,10 @@
   "history.attendees": "Účastníci",
   "history.edit": "Upravit",
   "history.save": "Uložit",
-  "history.cancel": "Zrušit"
+  "history.cancel": "Zrušit",
+  "adminTools.title": "Nástroje pro admina",
+  "adminTools.description": "Pro manuální testování — vytvoří dnešní demo a smaže jakékoli existující demo pro stejný den (včetně jeho projektů a záznamů).",
+  "adminTools.recreateDemo": "Vytvořit / přegenerovat dnešní demo",
+  "adminTools.recreateConfirm": "Opravdu přegenerovat dnešní demo? Existující demo pro tento den bude smazáno včetně projektů a záznamů.",
+  "adminTools.recreated": "Vytvořeno demo {{date}}. Načítám znovu..."
 }

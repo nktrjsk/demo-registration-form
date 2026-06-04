@@ -61,5 +61,10 @@
   "history.attendees": "Attendees",
   "history.edit": "Edit",
   "history.save": "Save",
-  "history.cancel": "Cancel"
+  "history.cancel": "Cancel",
+  "adminTools.title": "Admin tools",
+  "adminTools.description": "For manual testing — creates a Demo meeting for today, deleting any existing one for the same date (along with its projects and entries).",
+  "adminTools.recreateDemo": "Create / recreate today's Demo",
+  "adminTools.recreateConfirm": "Recreate today's Demo? Any existing meeting on this date will be deleted, including its projects and per-user entries.",
+  "adminTools.recreated": "Created Demo for {{date}}. Reloading..."
 }

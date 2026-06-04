@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.requests import Request
 
 from app.auth import get_email_from_request, require_admin
+from app.auto_create import now_local
 from app.database import get_db
 from app.models import (
     MeetingInstance,
@@ -186,6 +187,46 @@ async def get_my_entry(
         raise HTTPException(status_code=400, detail="OIDC session has no email claim")
     entry, project_entries = await _load_entry(db, meeting_id, user_email)
     return {"user_email": user_email, **_entry_to_dict(entry, project_entries)}
+
+
+@router.post(
+    "/admin/meeting/recreate",
+    dependencies=[Depends(require_admin)],
+)
+async def admin_recreate_meeting(
+    payload: dict = Body(default={}),
+    db: AsyncSession = Depends(get_db),
+):
+    """Admin-only: ensure a Demo meeting exists for the given date.
+
+    If one already exists on that date, it is deleted first (cascading
+    its projects and entries) so the meeting is effectively reset.
+    Defaults to today in the configured local timezone — convenient for
+    manual end-to-end testing without waiting for midnight.
+    """
+    date_str = payload.get("date")
+    if date_str:
+        try:
+            target = date.fromisoformat(str(date_str))
+        except ValueError:
+            raise HTTPException(status_code=422, detail="date must be YYYY-MM-DD")
+    else:
+        target = now_local().date()
+
+    existing = (
+        await db.execute(
+            select(MeetingInstance).where(MeetingInstance.meeting_date == target)
+        )
+    ).scalar_one_or_none()
+    if existing is not None:
+        await db.delete(existing)
+        await db.flush()
+
+    new_m = MeetingInstance(meeting_date=target)
+    db.add(new_m)
+    await db.commit()
+    await db.refresh(new_m)
+    return {"id": new_m.id, "meeting_date": new_m.meeting_date.isoformat()}
 
 
 @router.post("/meeting/{meeting_id}/projects")
