@@ -26,7 +26,7 @@ status = "pass"
 id = "REQ-005"
 parent = ""
 description = "The attendee roster auto-grows: any OIDC user who has ever signed in appears in the attendee list for current and future meetings."
-status = "pending"
+status = "pass"
 
 [[requirement]]
 id = "REQ-006"
@@ -74,7 +74,7 @@ status = "pass"
 id = "AI-013"
 parent = "REQ-002"
 description = "A non-admin user is rejected (UI hidden and API returns 403) when attempting to change the schedule."
-status = "retest"
+status = "pass"
 
 [[requirement]]
 id = "AI-014"
@@ -128,19 +128,19 @@ status = "pass"
 id = "AI-022"
 parent = "REQ-005"
 description = "A user logging in via OIDC for the first time is added to the roster and appears in the attendee list of the current and all future Demo meetings."
-status = "pending"
+status = "pass"
 
 [[requirement]]
 id = "AI-023"
 parent = "REQ-005"
 description = "A user appears at most once in the attendee roster, regardless of how many times they have logged in."
-status = "pending"
+status = "pass"
 
 [[requirement]]
 id = "AI-024"
 parent = "REQ-005"
 description = "A user whose email is referenced elsewhere but who has never authenticated via OIDC does NOT appear in the roster automatically."
-status = "pending"
+status = "pass"
 
 [[requirement]]
 id = "AI-025"

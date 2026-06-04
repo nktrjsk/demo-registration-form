@@ -1,14 +1,20 @@
 """Internal endpoints for the live meeting form."""
-from datetime import date
+from datetime import date, datetime, time
 
 from fastapi import Body, Depends, HTTPException
-from sqlalchemy import desc, select
+from sqlalchemy import desc, select, cast, Date
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.requests import Request
 
 from app.auth import get_email_from_request
 from app.database import get_db
-from app.models import MeetingInstance, MeetingEntry, ProjectEntry, Project
+from app.models import (
+    MeetingInstance,
+    MeetingEntry,
+    ProjectEntry,
+    Project,
+    UserRoster,
+)
 from app.routers.internal import router
 
 
@@ -96,6 +102,44 @@ async def get_my_entry(
         raise HTTPException(status_code=400, detail="OIDC session has no email claim")
     entry, project_entries = await _load_entry(db, meeting_id, user_email)
     return {"user_email": user_email, **_entry_to_dict(entry, project_entries)}
+
+
+@router.get("/meeting/{meeting_id}/attendees")
+async def get_attendees(meeting_id: int, db: AsyncSession = Depends(get_db)):
+    """Roster-derived attendee list: every user whose first OIDC login
+    was on or before this meeting's date, with their attendance flag
+    from MeetingEntry (False if no entry yet)."""
+    meeting = await db.get(MeetingInstance, meeting_id)
+    if meeting is None:
+        raise HTTPException(status_code=404, detail="Meeting not found")
+
+    # Users seen on or before this meeting's date (inclusive — someone
+    # who first logged in today still shows up on today's meeting).
+    end_of_day = datetime.combine(meeting.meeting_date, time(23, 59, 59))
+    roster = (
+        await db.execute(
+            select(UserRoster.email)
+            .where(UserRoster.first_seen_at <= end_of_day)
+            .order_by(UserRoster.first_seen_at)
+        )
+    ).all()
+    emails = [row[0] for row in roster]
+
+    entries = (
+        await db.execute(
+            select(MeetingEntry.user_email, MeetingEntry.attended).where(
+                MeetingEntry.meeting_instance_id == meeting_id
+            )
+        )
+    ).all()
+    attended_by = {email: bool(attended) for (email, attended) in entries}
+
+    return {
+        "attendees": [
+            {"email": email, "attended": attended_by.get(email, False)}
+            for email in emails
+        ]
+    }
 
 
 @router.put("/meeting/{meeting_id}/my-entry")

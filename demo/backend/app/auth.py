@@ -5,6 +5,7 @@ import httpx
 import jwt
 from fastapi import Depends, HTTPException
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from sqlalchemy.dialects.postgresql import insert
 from starlette.requests import Request
 
 logger = logging.getLogger(__name__)
@@ -74,6 +75,22 @@ async def validate_token(
         raise HTTPException(status_code=401, detail=f"Invalid token: {e}")
 
 
+async def record_login(email: str, session) -> None:
+    """Upsert the email into user_roster on each authenticated request,
+    so the roster auto-grows as users sign in. ON CONFLICT DO NOTHING
+    keeps first_seen_at stable across subsequent logins."""
+    # Lazy import to avoid circular import on module load.
+    from app.models import UserRoster
+
+    stmt = (
+        insert(UserRoster)
+        .values(email=email)
+        .on_conflict_do_nothing(index_elements=["email"])
+    )
+    await session.execute(stmt)
+    await session.commit()
+
+
 async def require_auth(
     request: Request,
     credentials: HTTPAuthorizationCredentials | None = Depends(security),
@@ -87,6 +104,12 @@ async def require_auth(
             detail=f"User not in required group: {ALLOWED_GROUP}",
         )
     request.state.claims = claims
+    email = claims.get("email")
+    if email:
+        from app.database import async_session
+
+        async with async_session() as db:
+            await record_login(email, db)
 
 
 def get_username(claims: dict) -> str:

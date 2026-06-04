@@ -4,6 +4,7 @@ from app.models.meeting_schedule import MeetingSchedule
 from app.models.meeting_instance import MeetingInstance
 from app.models.project import Project
 from app.models.meeting_entry import MeetingEntry, ProjectEntry
+from app.models.user_roster import UserRoster
 
 __all__ = [
     "UserCounter",
@@ -13,4 +14,5 @@ __all__ = [
     "Project",
     "MeetingEntry",
     "ProjectEntry",
+    "UserRoster",
 ]
