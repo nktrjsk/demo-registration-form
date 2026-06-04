@@ -22,6 +22,7 @@ from app.models import (
     MeetingEntry,
     ProjectEntry,
     Project,
+    ProjectSubscription,
     UserRoster,
     MeetingSchedule,
 )
@@ -34,6 +35,7 @@ BOB = "bob@test.example"
 
 def _reset():
     clear_table(ProjectEntry)
+    clear_table(ProjectSubscription)
     clear_table(MeetingEntry)
     clear_table(Project)
     clear_table(MeetingInstance)
@@ -124,7 +126,6 @@ def test_meeting_details_returns_projects_and_attendees(make_client):
 
         async def _seed_extras(session):
             p = Project(
-                meeting_instance_id=meeting_id,
                 name="CETIN",
                 leader="Jachym",
                 created_by_email="seed@test.example",
@@ -197,7 +198,6 @@ def test_admin_can_edit_historic_entry(make_client):
 
         async def _seed_p(session):
             p = Project(
-                meeting_instance_id=meeting_id,
                 name="X",
                 leader="Y",
                 created_by_email="seed@test.example",

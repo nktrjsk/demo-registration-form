@@ -20,6 +20,7 @@ from app.models import (
     MeetingEntry,
     ProjectEntry,
     Project,
+    ProjectSubscription,
     UserRoster,
 )
 from tests.conftest import clear_table, db_run
@@ -32,6 +33,7 @@ NEVER = "never-logged-in@test.example"
 
 def _reset():
     clear_table(ProjectEntry)
+    clear_table(ProjectSubscription)
     clear_table(MeetingEntry)
     clear_table(Project)
     clear_table(MeetingInstance)

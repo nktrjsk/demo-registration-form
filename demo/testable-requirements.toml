@@ -31,7 +31,7 @@ status = "pass"
 [[requirement]]
 id = "REQ-006"
 parent = ""
-description = "Any signed-in user can add a new project (with a leader name) to the current Demo meeting; the project then appears for everyone to log entries under."
+description = "Any signed-in user can add a new project (with a leader name) to the global project catalog; the project then becomes available for entries on any current or future meeting."
 status = "pass"
 
 [[requirement]]
@@ -145,19 +145,19 @@ status = "pass"
 [[requirement]]
 id = "AI-025"
 parent = "REQ-006"
-description = "Any signed-in user can submit a new project (with project name and leader name) to the current Demo meeting."
+description = "Any signed-in user can submit a new project (with project name and leader name) to the global catalog via POST /internal/projects."
 status = "pass"
 
 [[requirement]]
 id = "AI-026"
 parent = "REQ-006"
-description = "A project added by one user becomes immediately visible to all other users on the same meeting (after a reload at most)."
+description = "A project added by one user becomes immediately visible to all other users via GET /internal/projects."
 status = "pass"
 
 [[requirement]]
 id = "AI-027"
 parent = "REQ-006"
-description = "Newly added projects are scoped to the meeting they were added to and do not retroactively appear on past meetings."
+description = "Projects persist across Demo meetings: a project is in a single global catalog (not scoped to the meeting it was created from). The same project can be referenced from notes on any meeting, current or future."
 status = "pass"
 
 [[requirement]]
@@ -206,4 +206,46 @@ status = "pass"
 id = "AI-035"
 parent = "REQ-008"
 description = "The historical meeting view is read-only for non-admin users; admin users can edit attendees and per-project notes from the history view, and edits persist."
+status = "pass"
+
+[[requirement]]
+id = "REQ-036"
+parent = ""
+description = "Users have a personal 'my projects' subscription list and a search bar to find any project. Subscriptions auto-grow when a user first writes a note for a project. Anyone signed in can rename or delete any project."
+status = "pass"
+
+[[requirement]]
+id = "REQ-037"
+parent = "REQ-036"
+description = "GET /internal/me/subscriptions returns the signed-in user's subscribed projects with id/name/leader."
+status = "pass"
+
+[[requirement]]
+id = "REQ-038"
+parent = "REQ-036"
+description = "POST and DELETE /internal/me/subscriptions/{project_id} explicitly subscribe and unsubscribe the signed-in user; POST is idempotent."
+status = "pass"
+
+[[requirement]]
+id = "REQ-039"
+parent = "REQ-036"
+description = "Writing a note (via PUT /my-entry or admin PUT entries/{user_email}) for a project the target user is not yet subscribed to silently auto-subscribes them."
+status = "pass"
+
+[[requirement]]
+id = "REQ-040"
+parent = "REQ-036"
+description = "GET /internal/projects?q=… returns projects whose name or leader matches the substring (case-insensitive), ordered by name."
+status = "pass"
+
+[[requirement]]
+id = "REQ-041"
+parent = "REQ-036"
+description = "Any signed-in user can PUT /internal/projects/{id} to rename a project or change its leader (duplicate name yields 409)."
+status = "pass"
+
+[[requirement]]
+id = "REQ-042"
+parent = "REQ-036"
+description = "Any signed-in user can DELETE /internal/projects/{id}; deletion cascades to all of the project's ProjectEntry rows and ProjectSubscription rows."
 status = "pass"

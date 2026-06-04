@@ -20,6 +20,7 @@ from app.models import (
     MeetingEntry,
     ProjectEntry,
     Project,
+    ProjectSubscription,
     UserRoster,
     MeetingSchedule,
 )
@@ -32,6 +33,7 @@ BOB = "bob@test.example"
 
 def _reset():
     clear_table(ProjectEntry)
+    clear_table(ProjectSubscription)
     clear_table(MeetingEntry)
     clear_table(Project)
     clear_table(MeetingInstance)
@@ -72,7 +74,6 @@ def _seed_meeting_with_project():
         session.add(m)
         await session.flush()
         p = Project(
-            meeting_instance_id=m.id,
             name="CETIN",
             leader="Jachym",
             created_by_email="seed@test.example",

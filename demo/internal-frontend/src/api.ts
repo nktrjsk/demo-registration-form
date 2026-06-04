@@ -116,6 +116,11 @@ export interface MeetingProject {
 export interface CurrentMeeting {
   id: number
   meeting_date: string
+}
+
+export interface MeetingWithProjects {
+  id: number
+  meeting_date: string
   projects: MeetingProject[]
 }
 
@@ -142,7 +147,7 @@ export interface Attendee {
 }
 
 export interface MeetingDetails {
-  meeting: CurrentMeeting
+  meeting: MeetingWithProjects
   attendees: Attendee[]
 }
 

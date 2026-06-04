@@ -19,6 +19,7 @@ from app.main import app
 from app.models import (
     MeetingInstance,
     Project,
+    ProjectSubscription,
     MeetingEntry,
     ProjectEntry,
     MeetingSchedule,
@@ -55,13 +56,11 @@ def _seed_meeting_with_projects():
         session.add(m)
         await session.flush()
         p1 = Project(
-            meeting_instance_id=m.id,
             name="CETIN",
             leader="Jachym Doležal",
             created_by_email="seed@test.example",
         )
         p2 = Project(
-            meeting_instance_id=m.id,
             name="Medin",
             leader="Timothy Hobbs",
             created_by_email="seed@test.example",
@@ -77,8 +76,8 @@ def _seed_meeting_with_projects():
 
 
 def _reset_all():
-    # ProjectEntry → MeetingEntry → Project → MeetingInstance → MeetingSchedule
     clear_table(ProjectEntry)
+    clear_table(ProjectSubscription)
     clear_table(MeetingEntry)
     clear_table(Project)
     clear_table(MeetingInstance)
@@ -100,18 +99,19 @@ def test_my_entry_returns_email_from_claims(user_client):
         _reset_all()
 
 
-def test_current_meeting_returns_latest_with_projects(user_client):
-    """The /meeting/current endpoint that the form will read on load."""
+def test_current_meeting_returns_latest_summary(user_client):
+    """The /meeting/current endpoint that the form reads on load.
+    Projects are global now (REQ-009), so they aren't on this payload
+    — the form fetches /projects + /me/subscriptions separately."""
     _reset_all()
     try:
-        meeting_id, p1, p2 = _seed_meeting_with_projects()
+        meeting_id, _, _ = _seed_meeting_with_projects()
         r = user_client.get("/internal/meeting/current")
         assert r.status_code == 200
         data = r.json()
         assert data["meeting"]["id"] == meeting_id
         assert data["meeting"]["meeting_date"] == "2026-06-01"
-        names = sorted(p["name"] for p in data["meeting"]["projects"])
-        assert names == ["CETIN", "Medin"]
+        assert "projects" not in data["meeting"]
     finally:
         _reset_all()
 

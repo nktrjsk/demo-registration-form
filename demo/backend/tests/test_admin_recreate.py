@@ -13,6 +13,7 @@ from app.models import (
     MeetingEntry,
     ProjectEntry,
     Project,
+    ProjectSubscription,
     UserRoster,
     MeetingSchedule,
 )
@@ -24,6 +25,7 @@ ALICE = "alice@test.example"
 
 def _reset():
     clear_table(ProjectEntry)
+    clear_table(ProjectSubscription)
     clear_table(MeetingEntry)
     clear_table(Project)
     clear_table(MeetingInstance)
@@ -87,7 +89,6 @@ def test_admin_recreate_wipes_existing_meeting_and_entries(make_client):
             session.add(m)
             await session.flush()
             p = Project(
-                meeting_instance_id=m.id,
                 name="CETIN",
                 leader="Jachym",
                 created_by_email="seed@test.example",
@@ -119,14 +120,18 @@ def test_admin_recreate_wipes_existing_meeting_and_entries(make_client):
             assert new_id != old_id
 
         async def _children_gone(session):
-            rows = await session.execute(
-                select(Project).where(Project.meeting_instance_id == old_id)
-            )
-            assert list(rows.scalars().all()) == []
+            # MeetingEntry + (via cascade) ProjectEntry rows tied to the
+            # old meeting must be gone. Projects are global now, so they
+            # survive the meeting reset (catalog persistence is the whole
+            # point of REQ-009).
             rows = await session.execute(
                 select(MeetingEntry).where(MeetingEntry.meeting_instance_id == old_id)
             )
             assert list(rows.scalars().all()) == []
+            rows = await session.execute(
+                select(Project).where(Project.name == "CETIN")
+            )
+            assert len(list(rows.scalars().all())) == 1, "global project survives"
 
         db_run(_children_gone)
     finally:
