@@ -15,9 +15,9 @@ from app.models import (
     MeetingInstance,
     MeetingEntry,
     ProjectEntry,
+    Person,
     Project,
     ProjectSubscription,
-    UserRoster,
 )
 from app.routers.internal import router
 
@@ -27,8 +27,21 @@ from app.routers.internal import router
 # ---------------------------------------------------------------------------
 
 
-def _project_to_dict(p: Project) -> dict:
-    return {"id": p.id, "name": p.name, "leader": p.leader}
+def _person_to_dict(p: Person) -> dict:
+    return {
+        "id": p.id,
+        "display_name": p.display_name,
+        "email": p.email,
+        "resolved": p.email is not None,
+    }
+
+
+def _project_to_dict(p: Project, leader: Person) -> dict:
+    return {
+        "id": p.id,
+        "name": p.name,
+        "leader": _person_to_dict(leader),
+    }
 
 
 def _meeting_summary(m: MeetingInstance) -> dict:
@@ -52,8 +65,17 @@ async def _ensure_subscription(db: AsyncSession, user_email: str, project_id: in
     await db.execute(stmt)
 
 
+async def _load_leader(db: AsyncSession, project: Project) -> Person:
+    """Project.leader_person_id is NOT NULL so the lookup is total."""
+    leader = await db.get(Person, project.leader_person_id)
+    if leader is None:
+        # This would mean the FK was violated, which the schema prevents.
+        raise HTTPException(status_code=500, detail="Project leader missing")
+    return leader
+
+
 # ---------------------------------------------------------------------------
-# Projects (global catalog)
+# People (Persons: real + placeholders)
 # ---------------------------------------------------------------------------
 
 
@@ -63,16 +85,55 @@ async def list_people(
     limit: int = 50,
     db: AsyncSession = Depends(get_db),
 ):
-    """Return the people the picker can select from — i.e., the OIDC
-    user roster. Supports an optional case-insensitive substring search
-    on the email."""
-    limit = max(1, min(int(limit), 200))
-    query = select(UserRoster.email).order_by(UserRoster.email).limit(limit)
+    """All known persons — resolved (email present) and placeholders (no
+    email yet). Optional case-insensitive substring search across both
+    display_name and email."""
+    limit = max(1, min(int(limit), 500))
+    query = select(Person).order_by(Person.display_name).limit(limit)
     if q:
         like = f"%{q}%"
-        query = query.where(UserRoster.email.ilike(like))
-    rows = (await db.execute(query)).all()
-    return {"people": [row[0] for row in rows]}
+        query = query.where(
+            or_(Person.display_name.ilike(like), Person.email.ilike(like))
+        )
+    rows = (await db.execute(query)).scalars().all()
+    return {"people": [_person_to_dict(p) for p in rows]}
+
+
+@router.post("/people")
+async def create_person(
+    payload: dict = Body(...),
+    db: AsyncSession = Depends(get_db),
+):
+    """Create a placeholder Person. Used by the leader picker when the
+    target user isn't in the roster yet — the row will be auto-paired
+    when that user signs in via OIDC."""
+    display_name = str(payload.get("display_name", "")).strip()
+    if not display_name:
+        raise HTTPException(status_code=422, detail="display_name required")
+    p = Person(display_name=display_name, email=None)
+    db.add(p)
+    await db.commit()
+    await db.refresh(p)
+    return _person_to_dict(p)
+
+
+# ---------------------------------------------------------------------------
+# Projects (global catalog)
+# ---------------------------------------------------------------------------
+
+
+async def _projects_with_leaders(
+    db: AsyncSession, query
+) -> list[tuple[Project, Person]]:
+    rows = (await db.execute(query)).scalars().all()
+    if not rows:
+        return []
+    leader_ids = list({p.leader_person_id for p in rows})
+    leaders = (
+        await db.execute(select(Person).where(Person.id.in_(leader_ids)))
+    ).scalars().all()
+    by_id = {l.id: l for l in leaders}
+    return [(p, by_id[p.leader_person_id]) for p in rows]
 
 
 @router.get("/projects")
@@ -85,9 +146,22 @@ async def list_projects(
     query = select(Project).order_by(Project.name).limit(limit)
     if q:
         like = f"%{q}%"
-        query = query.where(or_(Project.name.ilike(like), Project.leader.ilike(like)))
-    rows = (await db.execute(query)).scalars().all()
-    return {"projects": [_project_to_dict(p) for p in rows]}
+        # Search across project name + leader's display_name + email.
+        query = (
+            select(Project)
+            .join(Person, Person.id == Project.leader_person_id)
+            .where(
+                or_(
+                    Project.name.ilike(like),
+                    Person.display_name.ilike(like),
+                    Person.email.ilike(like),
+                )
+            )
+            .order_by(Project.name)
+            .limit(limit)
+        )
+    paired = await _projects_with_leaders(db, query)
+    return {"projects": [_project_to_dict(p, l) for p, l in paired]}
 
 
 @router.post("/projects")
@@ -98,21 +172,29 @@ async def create_project(
 ):
     user_email = get_email_from_request(request)
     name = str(payload.get("name", "")).strip()
-    leader = str(payload.get("leader", "")).strip()
-    if not name or not leader:
-        raise HTTPException(status_code=422, detail="name and leader are required")
-    proj = Project(name=name, leader=leader, created_by_email=user_email)
+    try:
+        leader_person_id = int(payload.get("leader_person_id"))
+    except (TypeError, ValueError):
+        raise HTTPException(status_code=422, detail="leader_person_id required")
+    if not name:
+        raise HTTPException(status_code=422, detail="name required")
+    if (await db.get(Person, leader_person_id)) is None:
+        raise HTTPException(status_code=422, detail="leader_person_id not found")
+
+    proj = Project(
+        name=name, leader_person_id=leader_person_id, created_by_email=user_email
+    )
     db.add(proj)
     try:
         await db.commit()
     except IntegrityError:
         await db.rollback()
         raise HTTPException(
-            status_code=409,
-            detail=f"A project named '{name}' already exists",
+            status_code=409, detail=f"A project named '{name}' already exists"
         )
     await db.refresh(proj)
-    return _project_to_dict(proj)
+    leader = await _load_leader(db, proj)
+    return _project_to_dict(proj, leader)
 
 
 @router.put("/projects/{project_id}")
@@ -129,11 +211,14 @@ async def update_project(
         if not new_name:
             raise HTTPException(status_code=422, detail="name must be non-empty")
         proj.name = new_name
-    if "leader" in payload:
-        new_leader = str(payload["leader"]).strip()
-        if not new_leader:
-            raise HTTPException(status_code=422, detail="leader must be non-empty")
-        proj.leader = new_leader
+    if "leader_person_id" in payload:
+        try:
+            new_leader_id = int(payload["leader_person_id"])
+        except (TypeError, ValueError):
+            raise HTTPException(status_code=422, detail="leader_person_id must be int")
+        if (await db.get(Person, new_leader_id)) is None:
+            raise HTTPException(status_code=422, detail="leader_person_id not found")
+        proj.leader_person_id = new_leader_id
     try:
         await db.commit()
     except IntegrityError:
@@ -142,7 +227,8 @@ async def update_project(
             status_code=409, detail="Another project with that name already exists"
         )
     await db.refresh(proj)
-    return _project_to_dict(proj)
+    leader = await _load_leader(db, proj)
+    return _project_to_dict(proj, leader)
 
 
 @router.delete("/projects/{project_id}")
@@ -159,7 +245,7 @@ async def delete_project(
 
 
 # ---------------------------------------------------------------------------
-# Subscriptions (the user's "my projects" list)
+# Subscriptions
 # ---------------------------------------------------------------------------
 
 
@@ -169,15 +255,14 @@ async def list_my_subscriptions(
     db: AsyncSession = Depends(get_db),
 ):
     user_email = get_email_from_request(request)
-    rows = (
-        await db.execute(
-            select(Project)
-            .join(ProjectSubscription, ProjectSubscription.project_id == Project.id)
-            .where(ProjectSubscription.user_email == user_email)
-            .order_by(Project.name)
-        )
-    ).scalars().all()
-    return {"subscriptions": [_project_to_dict(p) for p in rows]}
+    query = (
+        select(Project)
+        .join(ProjectSubscription, ProjectSubscription.project_id == Project.id)
+        .where(ProjectSubscription.user_email == user_email)
+        .order_by(Project.name)
+    )
+    paired = await _projects_with_leaders(db, query)
+    return {"subscriptions": [_project_to_dict(p, l) for p, l in paired]}
 
 
 @router.post("/me/subscriptions/{project_id}")
@@ -246,8 +331,6 @@ async def admin_recreate_meeting(
     payload: dict = Body(default={}),
     db: AsyncSession = Depends(get_db),
 ):
-    """Admin-only: create or recreate a Demo meeting for the given date
-    (default today, cascading delete of any existing meeting on the same date)."""
     date_str = payload.get("date")
     if date_str:
         try:
@@ -321,7 +404,6 @@ async def _apply_entry_update(
     attending = bool(payload.get("attending", False))
     raw_entries = payload.get("project_entries", []) or []
 
-    # Validate project_ids exist in the global catalog (no per-meeting scope now).
     incoming: dict[int, str] = {}
     for pe in raw_entries:
         try:
@@ -332,7 +414,6 @@ async def _apply_entry_update(
             raise HTTPException(status_code=422, detail=f"project_id {pid} does not exist")
         incoming[pid] = str(pe.get("description", ""))
 
-    # Upsert MeetingEntry.
     entry = (
         await db.execute(
             select(MeetingEntry).where(
@@ -352,7 +433,6 @@ async def _apply_entry_update(
     else:
         entry.attending = attending
 
-    # Replace ProjectEntry rows.
     existing = (
         await db.execute(
             select(ProjectEntry).where(ProjectEntry.meeting_entry_id == entry.id)
@@ -374,7 +454,6 @@ async def _apply_entry_update(
                 )
             )
 
-    # Auto-subscribe the user to every project they're recording a note for.
     for pid in incoming:
         await _ensure_subscription(db, user_email, pid)
 
@@ -439,6 +518,24 @@ async def admin_get_user_entry(
 
 
 # --- Meeting attendees / details ---
+#
+# The attendee roster is "Persons who have logged in by the end of this
+# meeting day" — i.e., resolved Persons (email IS NOT NULL) whose
+# first_seen_at <= the meeting date. Placeholders (no email) are NOT
+# attendees; they exist only as project leaders until they sign in.
+
+
+async def _resolved_persons_by_first_seen(
+    db: AsyncSession, end_of_day: datetime
+) -> list[str]:
+    rows = (
+        await db.execute(
+            select(Person.email)
+            .where(Person.email.is_not(None), Person.first_seen_at <= end_of_day)
+            .order_by(Person.first_seen_at)
+        )
+    ).all()
+    return [row[0] for row in rows]
 
 
 @router.get("/meeting/{meeting_id}/attendees")
@@ -447,14 +544,7 @@ async def get_attendees(meeting_id: int, db: AsyncSession = Depends(get_db)):
     if meeting is None:
         raise HTTPException(status_code=404, detail="Meeting not found")
     end_of_day = datetime.combine(meeting.meeting_date, time(23, 59, 59))
-    roster = (
-        await db.execute(
-            select(UserRoster.email)
-            .where(UserRoster.first_seen_at <= end_of_day)
-            .order_by(UserRoster.first_seen_at)
-        )
-    ).all()
-    emails = [row[0] for row in roster]
+    emails = await _resolved_persons_by_first_seen(db, end_of_day)
     entries = (
         await db.execute(
             select(MeetingEntry.user_email, MeetingEntry.attending).where(
@@ -477,29 +567,18 @@ async def get_meeting_details(meeting_id: int, db: AsyncSession = Depends(get_db
     if meeting is None:
         raise HTTPException(status_code=404, detail="Meeting not found")
 
-    # Projects discussed = those with at least one ProjectEntry on this meeting.
-    discussed = (
-        await db.execute(
-            select(Project)
-            .join(ProjectEntry, ProjectEntry.project_id == Project.id)
-            .join(MeetingEntry, MeetingEntry.id == ProjectEntry.meeting_entry_id)
-            .where(MeetingEntry.meeting_instance_id == meeting_id)
-            .distinct()
-            .order_by(Project.name)
-        )
-    ).scalars().all()
+    discussed_query = (
+        select(Project)
+        .join(ProjectEntry, ProjectEntry.project_id == Project.id)
+        .join(MeetingEntry, MeetingEntry.id == ProjectEntry.meeting_entry_id)
+        .where(MeetingEntry.meeting_instance_id == meeting_id)
+        .distinct()
+        .order_by(Project.name)
+    )
+    discussed_paired = await _projects_with_leaders(db, discussed_query)
 
     end_of_day = datetime.combine(meeting.meeting_date, time(23, 59, 59))
-    roster_emails = [
-        row[0]
-        for row in (
-            await db.execute(
-                select(UserRoster.email)
-                .where(UserRoster.first_seen_at <= end_of_day)
-                .order_by(UserRoster.first_seen_at)
-            )
-        ).all()
-    ]
+    roster_emails = await _resolved_persons_by_first_seen(db, end_of_day)
 
     entries = (
         await db.execute(
@@ -511,9 +590,7 @@ async def get_meeting_details(meeting_id: int, db: AsyncSession = Depends(get_db
     project_entries = (
         (
             await db.execute(
-                select(ProjectEntry).where(
-                    ProjectEntry.meeting_entry_id.in_(entry_ids)
-                )
+                select(ProjectEntry).where(ProjectEntry.meeting_entry_id.in_(entry_ids))
             )
         ).scalars().all()
         if entry_ids
@@ -544,7 +621,7 @@ async def get_meeting_details(meeting_id: int, db: AsyncSession = Depends(get_db
     return {
         "meeting": {
             **_meeting_summary(meeting),
-            "projects": [_project_to_dict(p) for p in discussed],
+            "projects": [_project_to_dict(p, l) for p, l in discussed_paired],
         },
         "attendees": attendees,
     }

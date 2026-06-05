@@ -1,16 +1,13 @@
-"""REQ-009 (renamed REQ-006): global project catalog + subscriptions.
+"""Global project catalog + subscriptions, using Person FK for leader.
 
 Covers:
-- AI-025 (rewritten): any signed-in user can POST a new global project.
-- AI-026 (rewritten): a project added by one user is visible to other
-  users via /projects.
-- AI-027 (rewritten): projects persist between meetings — they are NOT
-  scoped to the meeting they were created from. (Old AI-027 retired.)
+- AI-025 / 026 / 027 (rewritten): any user can POST a new global project;
+  it's visible to other users; projects persist across meetings.
 - Subscriptions: list / explicit subscribe / explicit unsubscribe.
 - Auto-subscribe when a user writes a note for an unsubscribed project.
-- Edit (rename, change leader) — anyone signed in.
+- Edit (rename, change leader_person_id) — anyone signed in.
 - Delete — anyone signed in (cascades to entries + subscriptions).
-- Search via ?q=.
+- Search via ?q= matches project name, leader display_name, leader email.
 """
 from datetime import date
 
@@ -25,9 +22,9 @@ from app.models import (
     MeetingInstance,
     MeetingEntry,
     ProjectEntry,
+    Person,
     Project,
     ProjectSubscription,
-    UserRoster,
     MeetingSchedule,
 )
 from tests.conftest import clear_table, db_run
@@ -43,7 +40,7 @@ def _reset():
     clear_table(MeetingEntry)
     clear_table(Project)
     clear_table(MeetingInstance)
-    clear_table(UserRoster)
+    clear_table(Person)
     clear_table(MeetingSchedule)
 
 
@@ -81,28 +78,44 @@ def _seed_meeting(meeting_date: date) -> int:
     return db_run(_do)
 
 
+def _new_leader(client: TestClient, name: str) -> int:
+    """Test helper: create a placeholder Person and return its id."""
+    return client.post(
+        "/internal/people", json={"display_name": name}
+    ).json()["id"]
+
+
+def _new_project(client: TestClient, name: str, leader_name: str) -> dict:
+    leader_id = _new_leader(client, leader_name)
+    r = client.post(
+        "/internal/projects",
+        json={"name": name, "leader_person_id": leader_id},
+    )
+    assert r.status_code == 200, r.text
+    return r.json()
+
+
 # --- Catalog CRUD ---
 
 
 def test_anyone_can_create_a_project(make_client):
-    """AI-025 (rewritten): any signed-in user can POST /projects."""
     _reset()
     try:
         with make_client(ALICE) as alice:
-            r = alice.post("/internal/projects", json={"name": "CETIN", "leader": "Jachym"})
-            assert r.status_code == 200, r.text
-            assert r.json()["name"] == "CETIN"
-            assert r.json()["leader"] == "Jachym"
+            project = _new_project(alice, "CETIN", "Jachym Doležal")
+            assert project["name"] == "CETIN"
+            assert project["leader"]["display_name"] == "Jachym Doležal"
+            assert project["leader"]["email"] is None
+            assert project["leader"]["resolved"] is False
     finally:
         _reset()
 
 
 def test_created_project_visible_to_other_users(make_client):
-    """AI-026 (rewritten): visible via GET /projects."""
     _reset()
     try:
         with make_client(ALICE) as alice:
-            alice.post("/internal/projects", json={"name": "Medin", "leader": "Tim"})
+            _new_project(alice, "Medin", "Timothy Hobbs")
         with make_client(BOB) as bob:
             r = bob.get("/internal/projects")
             names = [p["name"] for p in r.json()["projects"]]
@@ -112,24 +125,21 @@ def test_created_project_visible_to_other_users(make_client):
 
 
 def test_projects_persist_between_meetings(make_client):
-    """AI-027 (rewritten): a project created in the context of one
-    meeting still appears (and is selectable) when a new meeting is
-    created later — global catalog, no per-meeting scoping."""
     _reset()
     try:
         with make_client(ALICE) as alice:
-            r = alice.post("/internal/projects", json={"name": "CETIN", "leader": "Jachym"})
-            project_id = r.json()["id"]
+            project_id = _new_project(alice, "CETIN", "Jachym")["id"]
         m1 = _seed_meeting(date(2026, 6, 1))
         m2 = _seed_meeting(date(2026, 6, 8))
         with make_client(BOB) as bob:
-            # Bob can write a CETIN entry on BOTH meetings — same project_id.
             for m_id in (m1, m2):
                 r = bob.put(
                     f"/internal/meeting/{m_id}/my-entry",
                     json={
                         "attending": True,
-                        "project_entries": [{"project_id": project_id, "description": "x"}],
+                        "project_entries": [
+                            {"project_id": project_id, "description": "x"}
+                        ],
                     },
                 )
                 assert r.status_code == 200, r.text
@@ -141,9 +151,13 @@ def test_duplicate_name_rejected(make_client):
     _reset()
     try:
         with make_client(ALICE) as alice:
-            r1 = alice.post("/internal/projects", json={"name": "CETIN", "leader": "Jachym"})
-            assert r1.status_code == 200
-            r2 = alice.post("/internal/projects", json={"name": "CETIN", "leader": "Other"})
+            _new_project(alice, "CETIN", "Jachym")
+            # Re-create with a different leader still collides on name.
+            leader_id = _new_leader(alice, "Other")
+            r2 = alice.post(
+                "/internal/projects",
+                json={"name": "CETIN", "leader_person_id": leader_id},
+            )
             assert r2.status_code == 409
     finally:
         _reset()
@@ -158,15 +172,15 @@ def test_search_by_name_or_leader(make_client):
                 ("Medin", "Timothy Hobbs"),
                 ("Avant", "Jan Kotrč"),
             ]:
-                alice.post("/internal/projects", json={"name": name, "leader": leader})
+                _new_project(alice, name, leader)
 
             r = alice.get("/internal/projects?q=med")
             names = [p["name"] for p in r.json()["projects"]]
             assert names == ["Medin"]
 
-            r = alice.get("/internal/projects?q=tim")
+            r = alice.get("/internal/projects?q=Tim")
             names = [p["name"] for p in r.json()["projects"]]
-            assert names == ["Medin"]  # matched via leader
+            assert names == ["Medin"]  # matched via leader display_name
     finally:
         _reset()
 
@@ -175,16 +189,18 @@ def test_anyone_can_edit_a_project(make_client):
     _reset()
     try:
         with make_client(ALICE) as alice:
-            pid = alice.post(
-                "/internal/projects", json={"name": "X", "leader": "Y"}
-            ).json()["id"]
+            pid = _new_project(alice, "X", "Y")["id"]
         with make_client(BOB) as bob:
+            new_leader = _new_leader(bob, "Z")
             r = bob.put(
                 f"/internal/projects/{pid}",
-                json={"name": "X-renamed", "leader": "Z"},
+                json={"name": "X-renamed", "leader_person_id": new_leader},
             )
-            assert r.status_code == 200
-            assert r.json() == {"id": pid, "name": "X-renamed", "leader": "Z"}
+            assert r.status_code == 200, r.text
+            body = r.json()
+            assert body["id"] == pid
+            assert body["name"] == "X-renamed"
+            assert body["leader"]["display_name"] == "Z"
     finally:
         _reset()
 
@@ -194,9 +210,7 @@ def test_anyone_can_delete_a_project_cascading_entries(make_client):
     try:
         meeting_id = _seed_meeting(date(2026, 6, 1))
         with make_client(ALICE) as alice:
-            pid = alice.post(
-                "/internal/projects", json={"name": "X", "leader": "Y"}
-            ).json()["id"]
+            pid = _new_project(alice, "X", "Y")["id"]
             alice.put(
                 f"/internal/meeting/{meeting_id}/my-entry",
                 json={
@@ -210,12 +224,9 @@ def test_anyone_can_delete_a_project_cascading_entries(make_client):
 
         async def _gone(session):
             row = (
-                await session.execute(
-                    select(Project).where(Project.id == pid)
-                )
+                await session.execute(select(Project).where(Project.id == pid))
             ).scalar_one_or_none()
             assert row is None
-            # Entries for that project are gone (CASCADE).
             count = len(
                 (
                     await session.execute(
@@ -230,6 +241,21 @@ def test_anyone_can_delete_a_project_cascading_entries(make_client):
         _reset()
 
 
+def test_project_payload_requires_leader_person_id(make_client):
+    _reset()
+    try:
+        with make_client(ALICE) as alice:
+            r = alice.post("/internal/projects", json={"name": "X"})
+            assert r.status_code == 422
+            r = alice.post(
+                "/internal/projects",
+                json={"name": "X", "leader_person_id": 999999},
+            )
+            assert r.status_code == 422
+    finally:
+        _reset()
+
+
 # --- Subscriptions ---
 
 
@@ -237,9 +263,7 @@ def test_explicit_subscribe_and_unsubscribe(make_client):
     _reset()
     try:
         with make_client(ALICE) as alice:
-            pid = alice.post(
-                "/internal/projects", json={"name": "X", "leader": "Y"}
-            ).json()["id"]
+            pid = _new_project(alice, "X", "Y")["id"]
 
             assert alice.get("/internal/me/subscriptions").json() == {"subscriptions": []}
 
@@ -248,7 +272,6 @@ def test_explicit_subscribe_and_unsubscribe(make_client):
             subs = alice.get("/internal/me/subscriptions").json()["subscriptions"]
             assert [s["name"] for s in subs] == ["X"]
 
-            # Subscribing again is idempotent (still one row).
             alice.post(f"/internal/me/subscriptions/{pid}")
             subs = alice.get("/internal/me/subscriptions").json()["subscriptions"]
             assert len(subs) == 1
@@ -261,19 +284,13 @@ def test_explicit_subscribe_and_unsubscribe(make_client):
 
 
 def test_auto_subscribe_on_first_note(make_client):
-    """The headline UX rule: writing a note for an unsubscribed project
-    silently subscribes the user."""
     _reset()
     try:
         meeting_id = _seed_meeting(date(2026, 6, 1))
         with make_client(ALICE) as alice:
-            pid = alice.post(
-                "/internal/projects", json={"name": "X", "leader": "Y"}
-            ).json()["id"]
-            # Alice has not subscribed yet.
+            pid = _new_project(alice, "X", "Y")["id"]
             assert alice.get("/internal/me/subscriptions").json() == {"subscriptions": []}
 
-            # First note: should auto-subscribe.
             alice.put(
                 f"/internal/meeting/{meeting_id}/my-entry",
                 json={
@@ -283,8 +300,6 @@ def test_auto_subscribe_on_first_note(make_client):
             )
             subs = alice.get("/internal/me/subscriptions").json()["subscriptions"]
             assert [s["id"] for s in subs] == [pid]
-
-            # Bob has not touched the project — Bob is NOT subscribed.
         with make_client(BOB) as bob:
             assert bob.get("/internal/me/subscriptions").json() == {"subscriptions": []}
     finally:
@@ -295,9 +310,7 @@ def test_subscription_isolated_per_user(make_client):
     _reset()
     try:
         with make_client(ALICE) as alice:
-            pid = alice.post(
-                "/internal/projects", json={"name": "X", "leader": "Y"}
-            ).json()["id"]
+            pid = _new_project(alice, "X", "Y")["id"]
             alice.post(f"/internal/me/subscriptions/{pid}")
         with make_client(BOB) as bob:
             assert bob.get("/internal/me/subscriptions").json() == {"subscriptions": []}
@@ -319,9 +332,7 @@ def test_delete_project_cascades_subscriptions(make_client):
     _reset()
     try:
         with make_client(ALICE) as alice:
-            pid = alice.post(
-                "/internal/projects", json={"name": "X", "leader": "Y"}
-            ).json()["id"]
+            pid = _new_project(alice, "X", "Y")["id"]
             alice.post(f"/internal/me/subscriptions/{pid}")
             alice.delete(f"/internal/projects/{pid}")
             subs = alice.get("/internal/me/subscriptions").json()["subscriptions"]

@@ -441,6 +441,51 @@ label {
   font-weight: 500;
 }
 
+.leader-picker__list li button {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.1rem;
+}
+
+.leader-picker__name {
+  font-weight: 500;
+  color: var(--text);
+}
+
+.leader-picker__email {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.leader-picker__badge {
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  background: var(--surface-muted);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0.05rem 0.45rem;
+  margin-top: 0.15rem;
+}
+
+.leader-picker__create button {
+  width: 100%;
+  text-align: left;
+  border: none;
+  background: var(--accent-soft-bg);
+  color: var(--text);
+  padding: 0.45rem 0.75rem;
+  font-size: 0.875rem;
+  border-top: 1px solid var(--divider);
+  border-radius: 0;
+}
+
+.leader-picker__create button:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--accent) 15%, var(--surface-muted));
+}
+
 .leader-picker__empty {
   padding: 0.45rem 0.75rem;
   color: var(--text-muted);

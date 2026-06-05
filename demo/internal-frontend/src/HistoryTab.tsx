@@ -108,7 +108,7 @@ function MeetingDetailView({
         <ul>
           {details.meeting.projects.map(p => (
             <li key={p.id}>
-              <strong>{p.name}</strong> ({t('form.leader')}: {p.leader})
+              <strong>{p.name}</strong> ({t('form.leader')}: {p.leader.display_name})
             </li>
           ))}
         </ul>

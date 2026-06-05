@@ -75,19 +75,61 @@ async def validate_token(
         raise HTTPException(status_code=401, detail=f"Invalid token: {e}")
 
 
-async def record_login(email: str, session) -> None:
-    """Upsert the email into user_roster on each authenticated request,
-    so the roster auto-grows as users sign in. ON CONFLICT DO NOTHING
-    keeps first_seen_at stable across subsequent logins."""
-    # Lazy import to avoid circular import on module load.
-    from app.models import UserRoster
+async def record_login(email: str, session, display_name: str | None = None) -> None:
+    """Pair the OIDC user with a Person row.
 
-    stmt = (
-        insert(UserRoster)
-        .values(email=email)
-        .on_conflict_do_nothing(index_elements=["email"])
-    )
-    await session.execute(stmt)
+    1. If a Person exists with this email, refresh its display_name from
+       the claim (if provided) and bump first_seen_at on first match.
+    2. Else, if a placeholder (email IS NULL) exists whose display_name
+       matches the claim, set its email and first_seen_at — the
+       placeholder is now resolved, and every Project that points at it
+       silently picks up the email association.
+    3. Else, create a fresh Person with email + display_name.
+
+    Best-effort name match. If two placeholders share the same name,
+    the oldest unpaired one is paired; the rest stay placeholders for an
+    admin to clean up later.
+    """
+    # Lazy import to avoid circular import on module load.
+    from datetime import datetime, timezone
+
+    from sqlalchemy import select, update
+
+    from app.models import Person
+
+    fallback_name = display_name or email
+    now = datetime.now(timezone.utc)
+
+    # 1. Existing email → bump.
+    existing = (
+        await session.execute(select(Person).where(Person.email == email))
+    ).scalar_one_or_none()
+    if existing is not None:
+        if display_name and existing.display_name != display_name:
+            existing.display_name = display_name
+        if existing.first_seen_at is None:
+            existing.first_seen_at = now
+        await session.commit()
+        return
+
+    # 2. Placeholder by display_name → promote.
+    if display_name:
+        placeholder = (
+            await session.execute(
+                select(Person)
+                .where(Person.email.is_(None), Person.display_name == display_name)
+                .order_by(Person.created_at)
+                .limit(1)
+            )
+        ).scalar_one_or_none()
+        if placeholder is not None:
+            placeholder.email = email
+            placeholder.first_seen_at = now
+            await session.commit()
+            return
+
+    # 3. New Person.
+    session.add(Person(display_name=fallback_name, email=email, first_seen_at=now))
     await session.commit()
 
 
@@ -108,8 +150,9 @@ async def require_auth(
     if email:
         from app.database import async_session
 
+        display_name = claims.get("name") or claims.get("preferred_username")
         async with async_session() as db:
-            await record_login(email, db)
+            await record_login(email, db, display_name=display_name)
 
 
 def get_username(claims: dict) -> str:

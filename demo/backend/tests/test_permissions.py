@@ -19,9 +19,9 @@ from app.models import (
     MeetingInstance,
     MeetingEntry,
     ProjectEntry,
+    Person,
     Project,
     ProjectSubscription,
-    UserRoster,
     MeetingSchedule,
 )
 from tests.conftest import clear_table, db_run
@@ -37,7 +37,7 @@ def _reset():
     clear_table(MeetingEntry)
     clear_table(Project)
     clear_table(MeetingInstance)
-    clear_table(UserRoster)
+    clear_table(Person)
     clear_table(MeetingSchedule)
 
 
@@ -73,9 +73,12 @@ def _seed_meeting_with_project():
         m = MeetingInstance(meeting_date=date(2026, 6, 1))
         session.add(m)
         await session.flush()
+        leader = Person(display_name="Jachym", email=None)
+        session.add(leader)
+        await session.flush()
         p = Project(
             name="CETIN",
-            leader="Jachym",
+            leader_person_id=leader.id,
             created_by_email="seed@test.example",
         )
         session.add(p)

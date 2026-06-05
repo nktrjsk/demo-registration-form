@@ -21,9 +21,9 @@ from app.models import (
     MeetingInstance,
     MeetingEntry,
     ProjectEntry,
+    Person,
     Project,
     ProjectSubscription,
-    UserRoster,
     MeetingSchedule,
 )
 from tests.conftest import clear_table, db_run
@@ -39,7 +39,7 @@ def _reset():
     clear_table(MeetingEntry)
     clear_table(Project)
     clear_table(MeetingInstance)
-    clear_table(UserRoster)
+    clear_table(Person)
     clear_table(MeetingSchedule)
 
 
@@ -78,7 +78,7 @@ def _record(email: str):
 def _backdate_first_seen(email: str, when: datetime):
     async def _do(session):
         await session.execute(
-            update(UserRoster).where(UserRoster.email == email).values(first_seen_at=when)
+            update(Person).where(Person.email == email).values(first_seen_at=when)
         )
         await session.commit()
 
@@ -125,9 +125,12 @@ def test_meeting_details_returns_projects_and_attendees(make_client):
         _backdate_first_seen(BOB, datetime(2026, 5, 1, tzinfo=timezone.utc))
 
         async def _seed_extras(session):
+            leader = Person(display_name="Jachym", email=None)
+            session.add(leader)
+            await session.flush()
             p = Project(
                 name="CETIN",
-                leader="Jachym",
+                leader_person_id=leader.id,
                 created_by_email="seed@test.example",
             )
             session.add(p)
@@ -197,9 +200,12 @@ def test_admin_can_edit_historic_entry(make_client):
         _backdate_first_seen(BOB, datetime(2026, 5, 1, tzinfo=timezone.utc))
 
         async def _seed_p(session):
+            leader = Person(display_name="Y", email=None)
+            session.add(leader)
+            await session.flush()
             p = Project(
                 name="X",
-                leader="Y",
+                leader_person_id=leader.id,
                 created_by_email="seed@test.example",
             )
             session.add(p)

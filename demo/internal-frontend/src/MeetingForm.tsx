@@ -5,6 +5,7 @@ import {
   type CurrentMeeting,
   type MeetingProject,
   type MyEntry,
+  type Person,
 } from './api'
 import { LeaderPicker } from './LeaderPicker'
 
@@ -42,7 +43,7 @@ export function MeetingForm() {
   // New-project sub-form
   const [creatingNew, setCreatingNew] = useState(false)
   const [newName, setNewName] = useState('')
-  const [newLeader, setNewLeader] = useState('')
+  const [newLeader, setNewLeader] = useState<Person | null>(null)
   const [createError, setCreateError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -166,17 +167,18 @@ export function MeetingForm() {
   const submitNewProject = async () => {
     setCreateError(null)
     const name = newName.trim()
-    const leader = newLeader.trim()
-    if (!name || !leader) {
+    if (!name || !newLeader) {
       setCreateError(t('form.projectFieldsRequired'))
       return
     }
     try {
-      const created = await backend.post<MeetingProject>('/projects', { name, leader })
-      // Treat the newly-created project as immediately added to the form.
+      const created = await backend.post<MeetingProject>('/projects', {
+        name,
+        leader_person_id: newLeader.id,
+      })
       addProjectToForm(created)
       setNewName('')
-      setNewLeader('')
+      setNewLeader(null)
       setCreatingNew(false)
     } catch (e) {
       setCreateError(e instanceof Error ? e.message : String(e))
@@ -249,7 +251,7 @@ export function MeetingForm() {
                   onChange={() => toggleProject(p.id)}
                 />{' '}
                 <strong>{p.name}</strong>{' '}
-                <span className="project-leader">({t('form.leader')}: {p.leader})</span>
+                <span className="project-leader">({t('form.leader')}: {p.leader.display_name}{p.leader.resolved ? '' : ` · ${t('leaderPicker.placeholderBadge')}`})</span>
               </label>
               {p.id in draftEntries && (
                 <textarea
@@ -281,7 +283,7 @@ export function MeetingForm() {
             .map(p => (
               <li key={p.id}>
                 <button onClick={() => addProjectToForm(p)}>
-                  + {p.name} ({p.leader})
+                  + {p.name} ({p.leader.display_name})
                 </button>
               </li>
             ))}
@@ -302,7 +304,7 @@ export function MeetingForm() {
               onChange={e => setNewName(e.target.value)}
             />
           </label>{' '}
-          <label>
+          <label className="leader-label">
             {t('form.leader')}:{' '}
             <LeaderPicker
               value={newLeader}

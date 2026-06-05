@@ -18,6 +18,7 @@ from app.auth import require_auth
 from app.main import app
 from app.models import (
     MeetingInstance,
+    Person,
     Project,
     ProjectSubscription,
     MeetingEntry,
@@ -53,16 +54,18 @@ def _seed_meeting_with_projects():
 
     async def _do(session):
         m = MeetingInstance(meeting_date=date(2026, 6, 1))
-        session.add(m)
+        leader1 = Person(display_name="Jachym Doležal", email=None)
+        leader2 = Person(display_name="Timothy Hobbs", email=None)
+        session.add_all([m, leader1, leader2])
         await session.flush()
         p1 = Project(
             name="CETIN",
-            leader="Jachym Doležal",
+            leader_person_id=leader1.id,
             created_by_email="seed@test.example",
         )
         p2 = Project(
             name="Medin",
-            leader="Timothy Hobbs",
+            leader_person_id=leader2.id,
             created_by_email="seed@test.example",
         )
         session.add_all([p1, p2])
@@ -81,6 +84,7 @@ def _reset_all():
     clear_table(MeetingEntry)
     clear_table(Project)
     clear_table(MeetingInstance)
+    clear_table(Person)
     clear_table(MeetingSchedule)
 
 

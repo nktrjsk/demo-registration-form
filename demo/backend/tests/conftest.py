@@ -77,3 +77,24 @@ def clear_table(model_cls):
         await session.commit()
 
     db_run(_do)
+
+
+def make_person(display_name: str, email: str | None = None) -> int:
+    """Create a Person row directly (test helper). Returns the new id.
+    Use email=None for a placeholder; email='alice@…' for a resolved one."""
+    from datetime import datetime, timezone
+
+    from app.models import Person
+
+    async def _do(session):
+        p = Person(
+            display_name=display_name,
+            email=email,
+            first_seen_at=datetime.now(timezone.utc) if email else None,
+        )
+        session.add(p)
+        await session.commit()
+        await session.refresh(p)
+        return p.id
+
+    return db_run(_do)

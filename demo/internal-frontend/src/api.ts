@@ -107,10 +107,17 @@ export async function fetchSchedule(): Promise<MeetingSchedule> {
   return r.json()
 }
 
+export interface Person {
+  id: number
+  display_name: string
+  email: string | null
+  resolved: boolean
+}
+
 export interface MeetingProject {
   id: number
   name: string
-  leader: string
+  leader: Person
 }
 
 export interface CurrentMeeting {
