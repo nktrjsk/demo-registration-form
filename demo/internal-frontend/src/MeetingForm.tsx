@@ -6,6 +6,7 @@ import {
   type MeetingProject,
   type MyEntry,
 } from './api'
+import { LeaderPicker } from './LeaderPicker'
 
 
 function formatMeetingDate(iso: string, locale: string): string {
@@ -303,10 +304,10 @@ export function MeetingForm() {
           </label>{' '}
           <label>
             {t('form.leader')}:{' '}
-            <input
-              type="text"
+            <LeaderPicker
               value={newLeader}
-              onChange={e => setNewLeader(e.target.value)}
+              onChange={setNewLeader}
+              placeholder={t('form.leaderPlaceholder')}
             />
           </label>{' '}
           <button onClick={submitNewProject}>{t('form.add')}</button>{' '}

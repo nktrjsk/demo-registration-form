@@ -380,6 +380,73 @@ label {
   width: 12rem;
 }
 
+/* --- Leader picker (combobox) --------------------------------------------- */
+
+.leader-picker {
+  position: relative;
+  display: inline-block;
+}
+
+.leader-picker input {
+  width: 14rem;
+}
+
+.leader-picker__list {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 10;
+  max-height: 14rem;
+  overflow-y: auto;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  margin: 0;
+  padding: 0.25rem 0;
+  list-style: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+[data-theme="dark"] .leader-picker__list {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+}
+
+.leader-picker__list li {
+  margin: 0;
+}
+
+.leader-picker__list li button {
+  width: 100%;
+  text-align: left;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  padding: 0.4rem 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 400;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.leader-picker__list li button:hover,
+.leader-picker__list li button:focus-visible {
+  background: var(--surface-muted);
+  outline: none;
+}
+
+.leader-picker__list li button.selected {
+  background: var(--accent-soft-bg);
+  color: var(--text);
+  font-weight: 500;
+}
+
+.leader-picker__empty {
+  padding: 0.45rem 0.75rem;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+}
+
 /* --- Save row -------------------------------------------------------------- */
 
 .card > button[onclick],

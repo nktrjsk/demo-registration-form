@@ -57,6 +57,24 @@ async def _ensure_subscription(db: AsyncSession, user_email: str, project_id: in
 # ---------------------------------------------------------------------------
 
 
+@router.get("/people")
+async def list_people(
+    q: str | None = None,
+    limit: int = 50,
+    db: AsyncSession = Depends(get_db),
+):
+    """Return the people the picker can select from — i.e., the OIDC
+    user roster. Supports an optional case-insensitive substring search
+    on the email."""
+    limit = max(1, min(int(limit), 200))
+    query = select(UserRoster.email).order_by(UserRoster.email).limit(limit)
+    if q:
+        like = f"%{q}%"
+        query = query.where(UserRoster.email.ilike(like))
+    rows = (await db.execute(query)).all()
+    return {"people": [row[0] for row in rows]}
+
+
 @router.get("/projects")
 async def list_projects(
     q: str | None = None,
