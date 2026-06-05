@@ -9,8 +9,31 @@ import {
 } from './api'
 
 
+function formatDate(iso: string, locale: string): string {
+  const d = new Date(iso + 'T00:00:00')
+  if (Number.isNaN(d.getTime())) return iso
+  return d.toLocaleDateString(locale, {
+    weekday: 'short',
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  })
+}
+
+function formatDateLong(iso: string, locale: string): string {
+  const d = new Date(iso + 'T00:00:00')
+  if (Number.isNaN(d.getTime())) return iso
+  return d.toLocaleDateString(locale, {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  })
+}
+
+
 export function HistoryTab({ isAdmin }: { isAdmin: boolean }) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const [meetings, setMeetings] = useState<MeetingSummary[] | null>(null)
   const [selectedId, setSelectedId] = useState<number | null>(null)
   const [details, setDetails] = useState<MeetingDetails | null>(null)
@@ -47,7 +70,7 @@ export function HistoryTab({ isAdmin }: { isAdmin: boolean }) {
                 onClick={() => loadDetails(m.id)}
                 className={selectedId === m.id ? 'active' : ''}
               >
-                {m.meeting_date}
+                {formatDate(m.meeting_date, i18n.language)}
               </button>
             </li>
           ))}
@@ -74,10 +97,10 @@ function MeetingDetailView({
   isAdmin: boolean
   onChange: () => void
 }) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   return (
     <div className="history-detail">
-      <h3>{details.meeting.meeting_date}</h3>
+      <h3>{formatDateLong(details.meeting.meeting_date, i18n.language)}</h3>
       <h4>{t('form.projects')}</h4>
       {details.meeting.projects.length === 0 ? (
         <p>{t('form.noProjects')}</p>
@@ -123,7 +146,7 @@ function AttendeeRow({
 }) {
   const { t } = useTranslation()
   const [editing, setEditing] = useState(false)
-  const [draftAttended, setDraftAttended] = useState(attendee.attended)
+  const [draftAttending, setDraftAttending] = useState(attendee.attending)
   const [draftEntries, setDraftEntries] = useState<Record<number, string>>(
     Object.fromEntries(attendee.project_entries.map(pe => [pe.project_id, pe.description]))
   )
@@ -131,7 +154,7 @@ function AttendeeRow({
   const [error, setError] = useState<string | null>(null)
 
   const startEdit = () => {
-    setDraftAttended(attendee.attended)
+    setDraftAttending(attendee.attending)
     setDraftEntries(
       Object.fromEntries(attendee.project_entries.map(pe => [pe.project_id, pe.description]))
     )
@@ -144,7 +167,7 @@ function AttendeeRow({
     setError(null)
     try {
       await backend.put(`/meeting/${meetingId}/entries/${encodeURIComponent(attendee.email)}`, {
-        attended: draftAttended,
+        attending: draftAttending,
         project_entries: Object.entries(draftEntries).map(([pid, desc]) => ({
           project_id: parseInt(pid, 10),
           description: desc,
@@ -162,8 +185,8 @@ function AttendeeRow({
   if (!editing) {
     return (
       <li className="attendee-row">
-        <span className={attendee.attended ? 'attended' : 'not-attended'}>
-          {attendee.attended ? '✓' : '✗'}
+        <span className={attendee.attending ? 'attending' : 'not-attending'}>
+          {attendee.attending ? '✓' : '✗'}
         </span>{' '}
         {attendee.email}
         {attendee.project_entries.length > 0 && (
@@ -199,8 +222,8 @@ function AttendeeRow({
       <label>
         <input
           type="checkbox"
-          checked={draftAttended}
-          onChange={e => setDraftAttended(e.target.checked)}
+          checked={draftAttending}
+          onChange={e => setDraftAttending(e.target.checked)}
         />{' '}
         <strong>{attendee.email}</strong>
       </label>
@@ -225,7 +248,7 @@ function AttendeeRow({
           </li>
         ))}
       </ul>
-      <button onClick={save} disabled={saving}>
+      <button className="primary" onClick={save} disabled={saving}>
         {saving ? t('form.saving') : t('history.save')}
       </button>{' '}
       <button onClick={() => setEditing(false)}>{t('history.cancel')}</button>

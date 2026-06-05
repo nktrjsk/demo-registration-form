@@ -128,7 +128,7 @@ def test_projects_persist_between_meetings(make_client):
                 r = bob.put(
                     f"/internal/meeting/{m_id}/my-entry",
                     json={
-                        "attended": True,
+                        "attending": True,
                         "project_entries": [{"project_id": project_id, "description": "x"}],
                     },
                 )
@@ -200,7 +200,7 @@ def test_anyone_can_delete_a_project_cascading_entries(make_client):
             alice.put(
                 f"/internal/meeting/{meeting_id}/my-entry",
                 json={
-                    "attended": True,
+                    "attending": True,
                     "project_entries": [{"project_id": pid, "description": "note"}],
                 },
             )
@@ -277,7 +277,7 @@ def test_auto_subscribe_on_first_note(make_client):
             alice.put(
                 f"/internal/meeting/{meeting_id}/my-entry",
                 json={
-                    "attended": True,
+                    "attending": True,
                     "project_entries": [{"project_id": pid, "description": "first"}],
                 },
             )

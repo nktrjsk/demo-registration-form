@@ -283,9 +283,9 @@ def _entry_to_dict(
     entry: MeetingEntry | None, project_entries: list[ProjectEntry]
 ) -> dict:
     if entry is None:
-        return {"attended": False, "project_entries": []}
+        return {"attending": False, "project_entries": []}
     return {
-        "attended": entry.attended,
+        "attending": entry.attending,
         "project_entries": [
             {"project_id": pe.project_id, "description": pe.description}
             for pe in project_entries
@@ -300,7 +300,7 @@ async def _apply_entry_update(
     if meeting is None:
         raise HTTPException(status_code=404, detail="Meeting not found")
 
-    attended = bool(payload.get("attended", False))
+    attending = bool(payload.get("attending", False))
     raw_entries = payload.get("project_entries", []) or []
 
     # Validate project_ids exist in the global catalog (no per-meeting scope now).
@@ -327,12 +327,12 @@ async def _apply_entry_update(
         entry = MeetingEntry(
             meeting_instance_id=meeting_id,
             user_email=user_email,
-            attended=attended,
+            attending=attending,
         )
         db.add(entry)
         await db.flush()
     else:
-        entry.attended = attended
+        entry.attending = attending
 
     # Replace ProjectEntry rows.
     existing = (
@@ -439,15 +439,15 @@ async def get_attendees(meeting_id: int, db: AsyncSession = Depends(get_db)):
     emails = [row[0] for row in roster]
     entries = (
         await db.execute(
-            select(MeetingEntry.user_email, MeetingEntry.attended).where(
+            select(MeetingEntry.user_email, MeetingEntry.attending).where(
                 MeetingEntry.meeting_instance_id == meeting_id
             )
         )
     ).all()
-    attended_by = {email: bool(attended) for (email, attended) in entries}
+    attending_by = {email: bool(attending) for (email, attending) in entries}
     return {
         "attendees": [
-            {"email": email, "attended": attended_by.get(email, False)}
+            {"email": email, "attending": attending_by.get(email, False)}
             for email in emails
         ]
     }
@@ -509,13 +509,13 @@ async def get_meeting_details(meeting_id: int, db: AsyncSession = Depends(get_db
     for email in roster_emails:
         entry = entries_by_email.get(email)
         if entry is None:
-            attendees.append({"email": email, "attended": False, "project_entries": []})
+            attendees.append({"email": email, "attending": False, "project_entries": []})
         else:
             pes = pe_by_entry_id.get(entry.id, [])
             attendees.append(
                 {
                     "email": email,
-                    "attended": entry.attended,
+                    "attending": entry.attending,
                     "project_entries": [
                         {"project_id": pe.project_id, "description": pe.description}
                         for pe in pes

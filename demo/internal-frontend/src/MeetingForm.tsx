@@ -8,14 +8,26 @@ import {
 } from './api'
 
 
+function formatMeetingDate(iso: string, locale: string): string {
+  const d = new Date(iso + 'T00:00:00')
+  if (Number.isNaN(d.getTime())) return iso
+  return d.toLocaleDateString(locale, {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  })
+}
+
+
 export function MeetingForm() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const [meeting, setMeeting] = useState<CurrentMeeting | null>(null)
   const [loading, setLoading] = useState(true)
   const [entry, setEntry] = useState<MyEntry | null>(null)
   const [subscribed, setSubscribed] = useState<MeetingProject[]>([])
   const [extraProjects, setExtraProjects] = useState<MeetingProject[]>([])
-  const [draftAttended, setDraftAttended] = useState(false)
+  const [draftAttending, setDraftAttending] = useState(false)
   const [draftEntries, setDraftEntries] = useState<Record<number, string>>({})
   const [saving, setSaving] = useState(false)
   const [savedAt, setSavedAt] = useState<Date | null>(null)
@@ -47,7 +59,7 @@ export function MeetingForm() {
           const e = await backend.get<MyEntry>(`/meeting/${m.id}/my-entry`)
           if (!alive) return
           setEntry(e)
-          setDraftAttended(e.attended)
+          setDraftAttending(e.attending)
           setDraftEntries(
             Object.fromEntries(e.project_entries.map(pe => [pe.project_id, pe.description])),
           )
@@ -176,7 +188,7 @@ export function MeetingForm() {
     setError(null)
     try {
       const updated = await backend.put<MyEntry>(`/meeting/${meeting.id}/my-entry`, {
-        attended: draftAttended,
+        attending: draftAttending,
         project_entries: Object.entries(draftEntries).map(([pid, desc]) => ({
           project_id: parseInt(pid, 10),
           description: desc,
@@ -207,18 +219,17 @@ export function MeetingForm() {
 
   return (
     <div className="card">
-      <h2>{t('form.title')}</h2>
-      <p>{t('form.meetingDate')}: <strong>{meeting.meeting_date}</strong></p>
-      <p>
+      <h2>{formatMeetingDate(meeting.meeting_date, i18n.language)}</h2>
+      <p className="muted">
         {t('form.yourEmail')}:{' '}
         <strong data-testid="meeting-form-email">{entry.user_email}</strong>
       </p>
 
-      <label>
+      <label className="block">
         <input
           type="checkbox"
-          checked={draftAttended}
-          onChange={e => { setDraftAttended(e.target.checked); setSavedAt(null) }}
+          checked={draftAttending}
+          onChange={e => { setDraftAttending(e.target.checked); setSavedAt(null) }}
         />{' '}
         {t('form.attending')}
       </label>
@@ -307,11 +318,17 @@ export function MeetingForm() {
       )}
 
       <hr />
-      <button onClick={submit} disabled={saving}>
-        {saving ? t('form.saving') : t('form.save')}
-      </button>
-      {savedAt && <span className="form-saved"> {t('form.savedAt', { time: savedAt.toLocaleTimeString() })}</span>}
-      {error && <p className="expired">{error}</p>}
+      <div className="save-row">
+        <button className="primary" onClick={submit} disabled={saving}>
+          {saving ? t('form.saving') : t('form.save')}
+        </button>
+        {savedAt && (
+          <span className="form-saved">
+            {t('form.savedAt', { time: savedAt.toLocaleTimeString() })}
+          </span>
+        )}
+        {error && <p className="expired">{error}</p>}
+      </div>
     </div>
   )
 }

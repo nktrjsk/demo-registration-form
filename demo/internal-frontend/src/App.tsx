@@ -103,26 +103,38 @@ function App() {
 
   return (
     <div className="app">
-      <div className="toolbar">
-        <select className="lang-select" value={i18n.language} onChange={changeLang}>
-          <option value="en">{t('language.en')}</option>
-          <option value="cs">{t('language.cs')}</option>
-        </select>
-        <button onClick={toggleTheme}>
-          {theme === 'dark' ? '☀️' : '🌙'}
-        </button>
-      </div>
-
-      <h1>{t('app.title')}</h1>
-
-      {user && (
-        <div className="user-bar">
-          <span>{user.email || user.preferredUsername}</span>{' '}
-          <button className="sign-out" onClick={() => window.location.href = '/oauth2/sign_out'}>
-            {t('userInfo.signOut')}
+      <header className="app-header">
+        <h1>{t('app.title')}</h1>
+        <div className="app-header__meta">
+          <select
+            className="lang-select"
+            value={i18n.language}
+            onChange={changeLang}
+            aria-label="Language"
+          >
+            <option value="en">{t('language.en')}</option>
+            <option value="cs">{t('language.cs')}</option>
+          </select>
+          <button
+            className="theme-toggle"
+            onClick={toggleTheme}
+            aria-label="Toggle theme"
+          >
+            {theme === 'dark' ? '☀️' : '🌙'}
           </button>
+          {user && (
+            <>
+              <span className="user-email">{user.email || user.preferredUsername}</span>
+              <button
+                className="sign-out"
+                onClick={() => (window.location.href = '/oauth2/sign_out')}
+              >
+                {t('userInfo.signOut')}
+              </button>
+            </>
+          )}
         </div>
-      )}
+      </header>
 
       <nav className="tabs">
         <button
@@ -173,7 +185,7 @@ function App() {
                   onChange={e => setDraftStartTime(e.target.value)}
                 />
               </label>{' '}
-              <button onClick={saveSchedule}>{t('schedule.save')}</button>{' '}
+              <button className="primary" onClick={saveSchedule}>{t('schedule.save')}</button>{' '}
               <button onClick={() => setEditingSchedule(false)}>{t('schedule.cancel')}</button>
               {scheduleError && <p className="expired">{scheduleError}</p>}
             </div>
@@ -185,7 +197,7 @@ function App() {
         <div className="card admin-tools">
           <h2>{t('adminTools.title')}</h2>
           <p className="muted">{t('adminTools.description')}</p>
-          <button onClick={recreateTodaysDemo}>
+          <button className="primary" onClick={recreateTodaysDemo}>
             {t('adminTools.recreateDemo')}
           </button>
           {recreatedDate && (

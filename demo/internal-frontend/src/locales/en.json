@@ -40,7 +40,7 @@
   "form.noMeeting": "No Demo meeting yet. The next one will appear on the configured demo day.",
   "form.meetingDate": "Meeting date",
   "form.yourEmail": "Your email",
-  "form.attending": "I attended this Demo",
+  "form.attending": "I'll be attending this Demo",
   "form.projects": "Projects",
   "form.noProjects": "No projects added for this meeting yet.",
   "form.leader": "Leader",

@@ -95,7 +95,7 @@ def test_non_admin_cannot_edit_others_entry(make_client):
         with make_client(ALICE, admin=False) as alice:
             r = alice.put(
                 f"/internal/meeting/{meeting_id}/entries/{BOB}",
-                json={"attended": True, "project_entries": []},
+                json={"attending": True, "project_entries": []},
             )
             assert r.status_code == 403, r.text
 
@@ -113,19 +113,19 @@ def test_admin_can_edit_other_users_attendance(make_client):
         with make_client(ALICE, admin=True) as admin:
             r = admin.put(
                 f"/internal/meeting/{meeting_id}/entries/{BOB}",
-                json={"attended": True, "project_entries": []},
+                json={"attending": True, "project_entries": []},
             )
             assert r.status_code == 200, r.text
-            assert r.json()["attended"] is True
+            assert r.json()["attending"] is True
 
             r = admin.get(f"/internal/meeting/{meeting_id}/entries/{BOB}")
-            assert r.json()["attended"] is True
+            assert r.json()["attending"] is True
 
         # Verify on the DB directly.
         async def _fetch(session):
             return (
                 await session.execute(
-                    select(MeetingEntry.attended).where(
+                    select(MeetingEntry.attending).where(
                         MeetingEntry.meeting_instance_id == meeting_id,
                         MeetingEntry.user_email == BOB,
                     )
@@ -146,7 +146,7 @@ def test_admin_can_edit_other_users_project_entries(make_client):
             r = admin.put(
                 f"/internal/meeting/{meeting_id}/entries/{BOB}",
                 json={
-                    "attended": True,
+                    "attending": True,
                     "project_entries": [
                         {"project_id": project_id, "description": "wrote up CETIN"}
                     ],
@@ -180,7 +180,7 @@ def test_admin_only_endpoints_require_admin(make_client):
 
             r = non_admin.put(
                 f"/internal/meeting/{meeting_id}/entries/{ALICE}",
-                json={"attended": False, "project_entries": []},
+                json={"attending": False, "project_entries": []},
             )
             assert r.status_code == 403
     finally:
@@ -195,10 +195,10 @@ def test_user_can_edit_own_entry(make_client):
         with make_client(BOB, admin=False) as bob:
             r = bob.put(
                 f"/internal/meeting/{meeting_id}/my-entry",
-                json={"attended": True, "project_entries": []},
+                json={"attending": True, "project_entries": []},
             )
             assert r.status_code == 200
             assert r.json()["user_email"] == BOB
-            assert r.json()["attended"] is True
+            assert r.json()["attending"] is True
     finally:
         _reset()

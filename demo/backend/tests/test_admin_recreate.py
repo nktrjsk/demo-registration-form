@@ -96,7 +96,7 @@ def test_admin_recreate_wipes_existing_meeting_and_entries(make_client):
             session.add(p)
             await session.flush()
             entry = MeetingEntry(
-                meeting_instance_id=m.id, user_email=ALICE, attended=True
+                meeting_instance_id=m.id, user_email=ALICE, attending=True
             )
             session.add(entry)
             await session.flush()

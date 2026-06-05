@@ -136,7 +136,7 @@ def test_meeting_details_returns_projects_and_attendees(make_client):
                 MeetingEntry(
                     meeting_instance_id=meeting_id,
                     user_email=ALICE,
-                    attended=True,
+                    attending=True,
                 )
             )
             await session.flush()
@@ -167,11 +167,11 @@ def test_meeting_details_returns_projects_and_attendees(make_client):
             assert data["meeting"]["id"] == meeting_id
             assert [p["name"] for p in data["meeting"]["projects"]] == ["CETIN"]
             by_email = {a["email"]: a for a in data["attendees"]}
-            assert by_email[ALICE]["attended"] is True
+            assert by_email[ALICE]["attending"] is True
             assert by_email[ALICE]["project_entries"] == [
                 {"project_id": project_id, "description": "Power consumption — PE"}
             ]
-            assert by_email[BOB]["attended"] is False
+            assert by_email[BOB]["attending"] is False
             assert by_email[BOB]["project_entries"] == []
     finally:
         _reset()
@@ -213,7 +213,7 @@ def test_admin_can_edit_historic_entry(make_client):
             r = admin.put(
                 f"/internal/meeting/{meeting_id}/entries/{BOB}",
                 json={
-                    "attended": True,
+                    "attending": True,
                     "project_entries": [
                         {"project_id": project_id, "description": "Backfilled by admin"},
                     ],
@@ -224,7 +224,7 @@ def test_admin_can_edit_historic_entry(make_client):
             # Confirm via /details.
             r = admin.get(f"/internal/meeting/{meeting_id}/details")
             by_email = {a["email"]: a for a in r.json()["attendees"]}
-            assert by_email[BOB]["attended"] is True
+            assert by_email[BOB]["attending"] is True
             assert by_email[BOB]["project_entries"] == [
                 {"project_id": project_id, "description": "Backfilled by admin"},
             ]

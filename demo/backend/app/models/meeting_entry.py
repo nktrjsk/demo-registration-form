@@ -22,7 +22,7 @@ class MeetingEntry(Base):
         ForeignKey("meeting_instances.id", ondelete="CASCADE"), nullable=False
     )
     user_email: Mapped[str] = mapped_column(Text, nullable=False)
-    attended: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    attending: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False
     )

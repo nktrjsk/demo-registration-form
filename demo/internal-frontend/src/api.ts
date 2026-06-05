@@ -131,7 +131,7 @@ export interface ProjectEntry {
 
 export interface MyEntry {
   user_email: string
-  attended: boolean
+  attending: boolean
   project_entries: ProjectEntry[]
 }
 
@@ -142,7 +142,7 @@ export interface MeetingSummary {
 
 export interface Attendee {
   email: string
-  attended: boolean
+  attending: boolean
   project_entries: ProjectEntry[]
 }
 

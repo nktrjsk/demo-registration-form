@@ -1,204 +1,576 @@
+/* ===========================================================================
+   Calm minimal design.
+   - Whitespace-heavy
+   - 1px borders, no shadows
+   - One restrained accent color
+   - Left-aligned, single-column layout
+   =========================================================================== */
+
 .app {
-  max-width: 1280px;
+  max-width: 760px;
   margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+  padding: 2rem 1.5rem 4rem;
+  text-align: left;
 }
 
-.toolbar {
+/* --- Header ---------------------------------------------------------------- */
+
+.app-header {
   display: flex;
-  justify-content: flex-end;
-  gap: 0.5em;
-  margin-bottom: 1em;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-bottom: 1.25rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--divider);
 }
 
-.toolbar button {
-  font-size: 0.85em;
-  padding: 0.4em 0.8em;
+.app-header h1 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin: 0;
+  color: var(--text);
+}
+
+.app-header__meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.app-header__meta .user-email {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
 }
 
 .lang-select {
-  font-size: 0.85em;
-  padding: 0.4em 0.8em;
-  border-radius: 8px;
-  border: 1px solid transparent;
-  background-color: var(--btn-bg);
-  color: var(--btn-text, var(--text));
+  font-size: 0.8125rem;
+  padding: 0.35rem 0.6rem;
+  background: var(--input-bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 6px;
   font-family: inherit;
-  font-weight: 500;
   cursor: pointer;
-  transition: border-color 0.25s;
 }
 
+.theme-toggle {
+  font-size: 0.95rem;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.3rem 0.55rem;
+  cursor: pointer;
+  color: var(--text-secondary);
+}
+
+.theme-toggle:hover,
 .lang-select:hover {
-  border-color: var(--btn-hover-border);
+  border-color: var(--border-strong);
+  color: var(--text);
 }
 
-.description {
+/* --- Tabs ------------------------------------------------------------------ */
+
+.tabs {
+  display: flex;
+  gap: 0.25rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--divider);
+}
+
+.tabs .tab {
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 0.6rem 0.85rem;
+  margin-bottom: -1px;
+  font-size: 0.9375rem;
+  font-weight: 500;
   color: var(--text-secondary);
-  font-size: 1em;
-  max-width: 700px;
-  margin: 0 auto 2em;
-  line-height: 1.6;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+.tabs .tab:hover {
+  color: var(--text);
 }
 
-.message {
-  color: var(--text-secondary);
-  font-size: 1.1em;
+.tabs .tab.active {
+  color: var(--text);
+  border-bottom-color: var(--accent);
 }
+
+/* --- Cards ----------------------------------------------------------------- */
 
 .card {
-  padding: 2em;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1.75rem 1.75rem 1.5rem;
+  margin: 0 0 1.5rem;
 }
 
-.card p {
-  color: var(--text-secondary);
-  font-size: 0.9em;
-  margin-top: 1em;
+.card h2 {
+  margin: 0 0 0.25rem;
+  font-size: 1.0625rem;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  color: var(--text);
 }
+
+.card h3 {
+  margin: 1.5rem 0 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.card h4 {
+  margin: 1.25rem 0 0.5rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.card > p {
+  margin: 0.25rem 0;
+  color: var(--text-secondary);
+  font-size: 0.9375rem;
+}
+
+.card strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.muted {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+hr {
+  border: none;
+  border-top: 1px solid var(--divider);
+  margin: 1.25rem 0;
+}
+
+/* --- Buttons --------------------------------------------------------------- */
 
 button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
   font-family: inherit;
-  background-color: var(--btn-bg);
-  color: var(--btn-text, var(--text));
+  font-size: 0.9375rem;
+  font-weight: 500;
+  padding: 0.5rem 0.95rem;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 6px;
   cursor: pointer;
-  transition: border-color 0.25s;
+  transition: background-color 0.15s, border-color 0.15s, color 0.15s;
 }
 
 button:hover {
-  border-color: var(--btn-hover-border);
+  border-color: var(--border-strong);
+  background: var(--surface-muted);
 }
 
-button:focus,
 button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+button.primary,
+.card button[type="submit"],
+.actions button.primary {
+  background: var(--accent);
+  color: var(--accent-fg);
+  border-color: var(--accent);
+}
+
+button.primary:hover {
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+}
+
+button.sign-out,
+button.delete-btn {
+  background: transparent;
+  color: var(--danger);
+  border: 1px solid transparent;
+  padding: 0.3rem 0.55rem;
+  font-size: 0.8125rem;
+}
+
+button.sign-out:hover,
+button.delete-btn:hover {
+  background: var(--danger-soft-bg);
+  border-color: transparent;
+}
+
+/* --- Form controls --------------------------------------------------------- */
+
+input[type="text"],
+input[type="search"],
+input[type="time"],
+select,
+textarea {
+  font-family: inherit;
+  font-size: 0.9375rem;
+  padding: 0.5rem 0.7rem;
+  background: var(--input-bg);
+  color: var(--text);
+  border: 1px solid var(--input-border);
+  border-radius: 6px;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  width: auto;
+}
+
+input[type="text"],
+input[type="search"],
+textarea {
+  width: 100%;
+}
+
+textarea {
+  resize: vertical;
+  min-height: 2.25rem;
+  line-height: 1.5;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--input-border-focus);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent);
+}
+
+input[type="checkbox"] {
+  width: 1rem;
+  height: 1rem;
+  accent-color: var(--accent);
+  margin-right: 0.35rem;
+  cursor: pointer;
+}
+
+label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.9375rem;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.card > label,
+.card label.block {
+  display: flex;
+  align-items: center;
+  padding: 0.45rem 0;
+}
+
+/* --- Meeting form: projects ----------------------------------------------- */
+
+.project-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.project-row {
+  padding: 0.65rem 0;
+  border-bottom: 1px solid var(--divider);
+}
+
+.project-row:last-child {
+  border-bottom: none;
+}
+
+.project-row label {
+  align-items: center;
+}
+
+.project-row textarea {
+  margin-top: 0.5rem;
+  margin-left: 1.4rem;
+  width: calc(100% - 1.4rem);
+}
+
+.project-leader {
+  color: var(--text-muted);
+  font-weight: 400;
+  font-size: 0.875rem;
+}
+
+/* --- Search + result list ------------------------------------------------- */
+
+.project-search {
+  margin-top: 0.5rem;
+}
+
+.search-results {
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0 0;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  max-height: 14rem;
+  overflow-y: auto;
+}
+
+.search-results li {
+  border-bottom: 1px solid var(--divider);
+}
+
+.search-results li:last-child {
+  border-bottom: none;
+}
+
+.search-results button {
+  width: 100%;
+  text-align: left;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  padding: 0.55rem 0.85rem;
+  color: var(--text);
+}
+
+.search-results button:hover {
+  background: var(--surface-muted);
+  border: none;
+}
+
+/* --- Add-project sub-form ------------------------------------------------- */
+
+.add-project {
+  margin-top: 0.75rem;
+  padding: 0.85rem 1rem;
+  background: var(--surface-muted);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem 0.75rem;
+  align-items: center;
+}
+
+.add-project label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.add-project input[type="text"] {
+  width: 12rem;
+}
+
+/* --- Save row -------------------------------------------------------------- */
+
+.card > button[onclick],
+.card > .save-row {
+  margin-top: 1rem;
+}
+
+.form-saved {
+  margin-left: 0.6rem;
+  font-size: 0.875rem;
+  color: var(--success);
 }
 
 .expired {
-  color: var(--danger) !important;
-  font-weight: bold;
-}
-
-button.sign-out {
-  margin-top: 1em;
-  background-color: var(--danger);
-  color: #fff;
-}
-
-button.sign-out:hover {
-  border-color: #ff4d5e;
-}
-
-.upload-area {
-  margin: 1em 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 1em;
-}
-
-.uploading {
-  color: var(--accent);
+  color: var(--danger);
+  font-size: 0.875rem;
   font-weight: 500;
+  margin: 0.5rem 0 0;
 }
 
-.gallery-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 1em;
-  margin-top: 1em;
+.message {
+  color: var(--success);
+  font-size: 0.875rem;
+  margin: 0.5rem 0 0;
 }
 
-.gallery-item {
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  overflow: hidden;
-  background: var(--card-bg);
-}
+/* --- Schedule edit row ----------------------------------------------------- */
 
-.gallery-item img {
-  width: 100%;
-  height: 150px;
-  object-fit: contain;
-  background: var(--bg-secondary);
-  padding: 0.5em;
-}
-
-.gallery-item-info {
+.schedule-edit {
+  margin-top: 0.5rem;
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.25em;
-  padding: 0.5em;
-}
-
-.gallery-placeholder {
-  width: 100%;
-  height: 150px;
-  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.75rem;
   align-items: center;
-  justify-content: center;
-  background: var(--bg-secondary);
-  color: var(--text-secondary);
-  font-size: 0.8em;
 }
 
-.gallery-item-name {
-  font-size: 0.85em;
+/* --- History list ---------------------------------------------------------- */
+
+.history-list {
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.history-list button {
+  font-size: 0.875rem;
+  padding: 0.35rem 0.7rem;
+}
+
+.history-list button.active {
+  background: var(--accent-soft-bg);
+  border-color: var(--accent);
   color: var(--text);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+}
+
+.history-detail {
+  margin-top: 1.25rem;
+  border-top: 1px solid var(--divider);
+  padding-top: 1rem;
+}
+
+.history-detail h3 {
+  margin-top: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: normal;
+  color: var(--text);
+}
+
+.history-detail h4 {
+  margin: 1rem 0 0.5rem;
+}
+
+.history-detail ul {
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+}
+
+.attendee-list > li {
+  padding: 0.65rem 0;
+  border-bottom: 1px solid var(--divider);
+}
+
+.attendee-list > li:last-child {
+  border-bottom: none;
+}
+
+.attendee-row .attending {
+  color: var(--success);
+  margin-right: 0.3rem;
+}
+
+.attendee-row .not-attending {
+  color: var(--text-muted);
+  margin-right: 0.3rem;
+}
+
+.attendee-notes {
+  margin: 0.35rem 0 0 1.2rem !important;
+  padding-left: 1rem !important;
+  list-style: disc inside;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+.attendee-notes em {
+  color: var(--text);
+  font-style: normal;
   font-weight: 500;
 }
 
-.gallery-item-meta {
-  font-size: 0.75em;
-  color: var(--text-secondary);
+.attendee-row.editing {
+  background: var(--surface-muted);
+  margin: 0.4rem -0.85rem;
+  padding: 0.6rem 0.85rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
 }
 
-button.delete-btn {
-  background-color: var(--danger);
-  color: #fff;
-  font-size: 0.75em;
-  padding: 0.3em 0.6em;
+.attendee-row.editing ul {
+  margin-top: 0.4rem;
 }
 
-button.delete-btn:hover {
-  border-color: #ff4d5e;
+.attendee-row.editing textarea {
+  margin-top: 0.3rem;
+  width: 100%;
 }
+
+/* --- Admin tools card ------------------------------------------------------ */
+
+.admin-tools {
+  border-color: var(--border);
+  background: var(--surface);
+}
+
+.admin-tools h2 {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 0.5rem;
+}
+
+/* --- Footer ---------------------------------------------------------------- */
 
 .powered-by {
-  margin-top: 3em;
-  padding: 1.5em 0;
-  border-top: 1px solid var(--border);
+  margin-top: 2.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--divider);
 }
 
 .powered-by a {
   display: inline-flex;
   align-items: center;
-  gap: 0.5em;
-  color: var(--text-secondary);
+  gap: 0.4rem;
+  color: var(--text-muted);
   text-decoration: none;
-  font-size: 0.85em;
-  transition: color 0.2s;
+  font-size: 0.8125rem;
 }
 
 .powered-by a:hover {
-  color: var(--text);
+  color: var(--text-secondary);
 }
 
 .powered-by-logo {
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
+  opacity: 0.7;
+}
+
+/* --- Small screens --------------------------------------------------------- */
+
+@media (max-width: 640px) {
+  .app {
+    padding: 1rem 1rem 3rem;
+  }
+  .app-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  .app-header__meta {
+    flex-wrap: wrap;
+  }
+  .card {
+    padding: 1.25rem;
+  }
 }

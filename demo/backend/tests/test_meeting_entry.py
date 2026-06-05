@@ -93,7 +93,7 @@ def test_my_entry_returns_email_from_claims(user_client):
         assert r.status_code == 200, r.text
         data = r.json()
         assert data["user_email"] == TEST_EMAIL
-        assert data["attended"] is False
+        assert data["attending"] is False
         assert data["project_entries"] == []
     finally:
         _reset_all()
@@ -121,25 +121,25 @@ def test_attendance_toggle_is_persisted(user_client):
     _reset_all()
     try:
         meeting_id, _, _ = _seed_meeting_with_projects()
-        # Mark attended=True.
+        # Mark attending=True.
         r = user_client.put(
             f"/internal/meeting/{meeting_id}/my-entry",
-            json={"attended": True, "project_entries": []},
+            json={"attending": True, "project_entries": []},
         )
         assert r.status_code == 200, r.text
-        assert r.json()["attended"] is True
+        assert r.json()["attending"] is True
 
         # GET reflects the change.
         r = user_client.get(f"/internal/meeting/{meeting_id}/my-entry")
-        assert r.json()["attended"] is True
+        assert r.json()["attending"] is True
 
         # Toggle back to False — also persisted.
         r = user_client.put(
             f"/internal/meeting/{meeting_id}/my-entry",
-            json={"attended": False, "project_entries": []},
+            json={"attending": False, "project_entries": []},
         )
         assert r.status_code == 200
-        assert r.json()["attended"] is False
+        assert r.json()["attending"] is False
     finally:
         _reset_all()
 
@@ -152,7 +152,7 @@ def test_select_multiple_projects_with_descriptions(user_client):
         r = user_client.put(
             f"/internal/meeting/{meeting_id}/my-entry",
             json={
-                "attended": True,
+                "attending": True,
                 "project_entries": [
                     {"project_id": p1, "description": "Power consumption — PE"},
                     {"project_id": p2, "description": "Medin onboarding doc"},
@@ -161,7 +161,7 @@ def test_select_multiple_projects_with_descriptions(user_client):
         )
         assert r.status_code == 200, r.text
         data = r.json()
-        assert data["attended"] is True
+        assert data["attending"] is True
         entries = {pe["project_id"]: pe["description"] for pe in data["project_entries"]}
         assert entries == {
             p1: "Power consumption — PE",
@@ -179,7 +179,7 @@ def test_reopening_returns_previously_submitted_values(user_client):
         user_client.put(
             f"/internal/meeting/{meeting_id}/my-entry",
             json={
-                "attended": True,
+                "attending": True,
                 "project_entries": [
                     {"project_id": p1, "description": "Initial sketch"},
                 ],
@@ -188,7 +188,7 @@ def test_reopening_returns_previously_submitted_values(user_client):
         r = user_client.get(f"/internal/meeting/{meeting_id}/my-entry")
         data = r.json()
         assert data["user_email"] == TEST_EMAIL
-        assert data["attended"] is True
+        assert data["attending"] is True
         assert data["project_entries"] == [
             {"project_id": p1, "description": "Initial sketch"}
         ]
@@ -204,7 +204,7 @@ def test_put_rejects_foreign_project_id(user_client):
         r = user_client.put(
             f"/internal/meeting/{meeting_id}/my-entry",
             json={
-                "attended": True,
+                "attending": True,
                 "project_entries": [
                     {"project_id": 999999, "description": "nope"},
                 ],

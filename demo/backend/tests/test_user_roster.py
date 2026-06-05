@@ -173,7 +173,7 @@ def test_attendees_includes_attendance_flag(client):
                 MeetingEntry(
                     meeting_instance_id=meeting_id,
                     user_email=ALICE,
-                    attended=True,
+                    attending=True,
                 )
             )
             await session.commit()
@@ -181,7 +181,7 @@ def test_attendees_includes_attendance_flag(client):
         db_run(_set_entry)
 
         attendees = client.get(f"/internal/meeting/{meeting_id}/attendees").json()["attendees"]
-        by_email = {a["email"]: a["attended"] for a in attendees}
+        by_email = {a["email"]: a["attending"] for a in attendees}
         assert by_email[ALICE] is True
         assert by_email[BOB] is False
     finally:
