@@ -7,10 +7,12 @@ Covers:
 """
 from datetime import datetime, date, time
 
+from fastapi.testclient import TestClient
 from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert
 
 from app.auto_create import LOCAL_TZ, create_if_demo_day
+from app.main import app
 from app.models import MeetingInstance, MeetingSchedule
 from tests.conftest import clear_table, db_run
 
@@ -110,3 +112,34 @@ def test_schedule_change_redirects_auto_create():
 
     clear_table(MeetingSchedule)
     clear_table(MeetingInstance)
+
+
+def test_startup_backfills_when_today_is_demo_day(monkeypatch):
+    """Regression: APScheduler's cron does not backfill a missed firing.
+    If the backend restarts past 00:00 on a demo day, the startup hook
+    must still create today's instance."""
+    monkeypatch.delenv("BITSWAN_DISABLE_SCHEDULER", raising=False)
+    today = date.today()
+    _set_schedule(today.weekday())
+    clear_table(MeetingInstance)
+    try:
+        with TestClient(app):
+            pass  # __enter__ runs FastAPI startup → catch_up_today
+        assert today in _list_instances()
+    finally:
+        clear_table(MeetingInstance)
+        clear_table(MeetingSchedule)
+
+
+def test_startup_noop_when_today_is_not_demo_day(monkeypatch):
+    monkeypatch.delenv("BITSWAN_DISABLE_SCHEDULER", raising=False)
+    today = date.today()
+    _set_schedule((today.weekday() + 1) % 7)  # schedule = tomorrow's weekday
+    clear_table(MeetingInstance)
+    try:
+        with TestClient(app):
+            pass
+        assert _list_instances() == []
+    finally:
+        clear_table(MeetingInstance)
+        clear_table(MeetingSchedule)

@@ -1,6 +1,12 @@
 import asyncio
 import os
 
+# Tests must not run the cron scheduler or its startup backfill — both have
+# date-dependent side effects (inserting today's MeetingInstance) that would
+# poison tests that assert on meeting list contents. Individual tests that
+# need the backfill enable it via monkeypatch.
+os.environ.setdefault("BITSWAN_DISABLE_SCHEDULER", "1")
+
 import pytest
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options

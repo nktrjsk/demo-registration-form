@@ -44,6 +44,7 @@ async def startup():
     await minio_client.ensure_bucket()
     await _preseed_gallery()
     auto_scheduler.start()
+    await auto_scheduler.catch_up_today()
 
 
 @app.on_event("shutdown")
