@@ -315,6 +315,14 @@ export function MeetingForm({ isAdmin }: MeetingFormProps = {}) {
   }
 
   if (loading) return <div className="card"><p>{t('form.loading')}</p></div>
+  if (error && !meeting) {
+    return (
+      <div className="card">
+        <h2>{t('form.title')}</h2>
+        <p className="expired">{t('form.loadError', { error })}</p>
+      </div>
+    )
+  }
   if (!meeting) {
     return (
       <div className="card">

@@ -38,6 +38,7 @@
   "form.title": "Demo meeting form",
   "form.loading": "Loading...",
   "form.noMeeting": "No Demo meeting yet. The next one will appear on the configured demo day.",
+  "form.loadError": "Couldn't load the meeting from the server: {{error}}. Check the browser console for details.",
   "form.meetingDate": "Meeting date",
   "form.yourEmail": "Your email",
   "form.attending": "I'll be attending this Demo",

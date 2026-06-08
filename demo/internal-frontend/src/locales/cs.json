@@ -38,6 +38,7 @@
   "form.title": "Formulář k demu",
   "form.loading": "Načítám...",
   "form.noMeeting": "Zatím žádné demo. Další se objeví v nakonfigurovaný den.",
+  "form.loadError": "Nepodařilo se načíst demo ze serveru: {{error}}. Detaily najdeš v konzoli prohlížeče.",
   "form.meetingDate": "Datum dema",
   "form.yourEmail": "Tvůj e-mail",
   "form.attending": "Půjdu na demo",
