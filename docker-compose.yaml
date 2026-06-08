@@ -14,7 +14,7 @@ services:
       BITSWAN_DEPLOYMENT_CONTEXT: demo-wt-demo-live-dev
       BITSWAN_DEPLOYMENT_ID: backend-wt-demo-demo-live-dev
       BITSWAN_DEPLOY_CHECKSUM: live-dev
-      BITSWAN_DEPLOY_TIME: '2026-06-08T09:40:25.013184Z'
+      BITSWAN_DEPLOY_TIME: '2026-06-08T09:40:50.442585Z'
       BITSWAN_GITOPS_DOMAIN: nikita-sandbox.bswn.io
       BITSWAN_URL_PREFIX: https://demo-meeting-form-
       BITSWAN_URL_SUFFIX: .nikita-sandbox.bswn.io
@@ -58,7 +58,7 @@ services:
       BITSWAN_DEPLOYMENT_CONTEXT: demo-dev
       BITSWAN_DEPLOYMENT_ID: backend-demo-dev
       BITSWAN_DEPLOY_CHECKSUM: ddfd054c3428a4ed3e5732de60f5b8041b413874
-      BITSWAN_DEPLOY_TIME: '2026-06-08T09:40:24.553841Z'
+      BITSWAN_DEPLOY_TIME: '2026-06-08T09:40:49.973579Z'
       BITSWAN_GITOPS_DOMAIN: nikita-sandbox.bswn.io
       BITSWAN_URL_PREFIX: https://demo-meeting-form-
       BITSWAN_URL_SUFFIX: .nikita-sandbox.bswn.io
@@ -89,6 +89,49 @@ services:
     volumes:
     - /root/.config/bitswan/certauthorities:/usr/local/share/ca-certificates/custom:ro
     - /root/.config/bitswan/workspaces/demo-meeting-form/gitops/ddfd054c3428a4ed3e5732de60f5b8041b413874:/app/:ro
+  demo-meeting-form-backend-2a97-production:
+    container_name: demo-meeting-form-backend-2a97-production
+    env_file:
+    - /gitops/secrets/postgres
+    - /gitops/secrets/minio
+    environment:
+      BITSWAN_ALLOWED_GROUP: /NikitaPlay
+      BITSWAN_AUTOMATION_STAGE: production
+      BITSWAN_AUTOMATION_URL: https://demo-meeting-form-backend-2a97-production.nikita-sandbox.bswn.io
+      BITSWAN_DEPLOYMENT_CONTEXT: demo
+      BITSWAN_DEPLOYMENT_ID: backend-demo
+      BITSWAN_DEPLOY_CHECKSUM: ddfd054c3428a4ed3e5732de60f5b8041b413874
+      BITSWAN_DEPLOY_TIME: '2026-06-08T09:40:49.768051Z'
+      BITSWAN_GITOPS_DOMAIN: nikita-sandbox.bswn.io
+      BITSWAN_URL_PREFIX: https://demo-meeting-form-
+      BITSWAN_URL_SUFFIX: .nikita-sandbox.bswn.io
+      BITSWAN_URL_TEMPLATE: https://demo-meeting-form-{name}-2a97.nikita-sandbox.bswn.io
+      BITSWAN_WORKSPACE_NAME: demo-meeting-form
+      KEYCLOAK_ISSUER_URL: https://keycloak.bitswan.ai/realms/master
+      KEYCLOAK_REALM: master
+      KEYCLOAK_URL: https://keycloak.bitswan.ai
+      UPDATE_CA_CERTIFICATES: 'true'
+    image: internal/demo-meeting-form-demo-backend:sha9a385567378f23933128c6ce8896bafee1271d85
+    labels:
+      gitops.automation_name: backend
+      gitops.certs.enabled: 'true'
+      gitops.context: demo
+      gitops.deployment_id: backend-demo
+      gitops.intended_exposed: 'true'
+      gitops.stage: production
+      gitops.workspace: demo-meeting-form
+    networks:
+      bitswan_network:
+        aliases:
+        - demo-meeting-form-backend-2a97-production.nikita-sandbox.bswn.io
+    restart: always
+    ulimits:
+      nofile:
+        hard: 65536
+        soft: 65536
+    volumes:
+    - /root/.config/bitswan/certauthorities:/usr/local/share/ca-certificates/custom:ro
+    - /root/.config/bitswan/workspaces/demo-meeting-form/gitops/ddfd054c3428a4ed3e5732de60f5b8041b413874:/app/:ro
   demo-meeting-form-backend-2a97-staging:
     container_name: demo-meeting-form-backend-2a97-staging
     env_file:
@@ -101,7 +144,7 @@ services:
       BITSWAN_DEPLOYMENT_CONTEXT: demo-staging
       BITSWAN_DEPLOYMENT_ID: backend-demo-staging
       BITSWAN_DEPLOY_CHECKSUM: ddfd054c3428a4ed3e5732de60f5b8041b413874
-      BITSWAN_DEPLOY_TIME: '2026-06-08T09:40:24.767959Z'
+      BITSWAN_DEPLOY_TIME: '2026-06-08T09:40:50.182546Z'
       BITSWAN_GITOPS_DOMAIN: nikita-sandbox.bswn.io
       BITSWAN_URL_PREFIX: https://demo-meeting-form-
       BITSWAN_URL_SUFFIX: .nikita-sandbox.bswn.io
@@ -141,7 +184,7 @@ services:
       BITSWAN_DEPLOYMENT_CONTEXT: demo-wt-demo-live-dev
       BITSWAN_DEPLOYMENT_ID: internal-frontend-wt-demo-demo-live-dev
       BITSWAN_DEPLOY_CHECKSUM: live-dev
-      BITSWAN_DEPLOY_TIME: '2026-06-08T09:40:26.248383Z'
+      BITSWAN_DEPLOY_TIME: '2026-06-08T09:40:51.698048Z'
       BITSWAN_GITOPS_DOMAIN: nikita-sandbox.bswn.io
       BITSWAN_URL_PREFIX: https://demo-meeting-form-
       BITSWAN_URL_SUFFIX: .nikita-sandbox.bswn.io
@@ -201,7 +244,7 @@ services:
       BITSWAN_DEPLOYMENT_CONTEXT: demo-dev
       BITSWAN_DEPLOYMENT_ID: internal-frontend-demo-dev
       BITSWAN_DEPLOY_CHECKSUM: 80a574ca70a320e749f5d3a3ffcece16a22fcc60
-      BITSWAN_DEPLOY_TIME: '2026-06-08T09:40:25.261594Z'
+      BITSWAN_DEPLOY_TIME: '2026-06-08T09:40:50.649463Z'
       BITSWAN_GITOPS_DOMAIN: nikita-sandbox.bswn.io
       BITSWAN_URL_PREFIX: https://demo-meeting-form-
       BITSWAN_URL_SUFFIX: .nikita-sandbox.bswn.io
@@ -260,7 +303,7 @@ services:
       BITSWAN_DEPLOYMENT_CONTEXT: demo-staging
       BITSWAN_DEPLOYMENT_ID: internal-frontend-demo-staging
       BITSWAN_DEPLOY_CHECKSUM: 80a574ca70a320e749f5d3a3ffcece16a22fcc60
-      BITSWAN_DEPLOY_TIME: '2026-06-08T09:40:25.743445Z'
+      BITSWAN_DEPLOY_TIME: '2026-06-08T09:40:51.183251Z'
       BITSWAN_GITOPS_DOMAIN: nikita-sandbox.bswn.io
       BITSWAN_URL_PREFIX: https://demo-meeting-form-
       BITSWAN_URL_SUFFIX: .nikita-sandbox.bswn.io
@@ -310,6 +353,37 @@ services:
     volumes:
     - /root/.config/bitswan/certauthorities:/usr/local/share/ca-certificates/custom:ro
     - /root/.config/bitswan/workspaces/demo-meeting-form/gitops/80a574ca70a320e749f5d3a3ffcece16a22fcc60:/app/:ro
+  minio:
+    command: server /data --console-address :9001
+    container_name: demo-meeting-form__minio
+    env_file:
+    - /gitops/secrets/minio
+    environment:
+      BITSWAN_AUTOMATION_URL: https://demo-meeting-form-minio.nikita-sandbox.bswn.io
+      OAUTH2_PROXY_CLIENT_ID: workspace-008e5dc9-ad56-422b-9b7a-38c709e6ebba-code-server-client
+      OAUTH2_PROXY_CLIENT_SECRET: UmvndhA9ohLVa2jtKxy31asm4CzFLOIn
+      OAUTH2_PROXY_CODE_CHALLENGE_METHOD: S256
+      OAUTH2_PROXY_COOKIE_SECRET: nqxxrX0JXVzuSyVpRIzNCy44WtR0sUWK
+      OAUTH2_PROXY_EMAIL_DOMAINS: '*'
+      OAUTH2_PROXY_HTTP_ADDRESS: 0.0.0.0:9999
+      OAUTH2_PROXY_MQTT_ALLOWED_GROUPS_TOPIC: /groups
+      OAUTH2_PROXY_OIDC_GROUPS_CLAIM: group_membership
+      OAUTH2_PROXY_OIDC_ISSUER_URL: https://keycloak.bitswan.ai/realms/master
+      OAUTH2_PROXY_PROVIDER: keycloak-oidc
+      OAUTH2_PROXY_REDIRECT_URL: https://demo-meeting-form-minio.nikita-sandbox.bswn.io/oauth2/callback
+      OAUTH2_PROXY_SCOPE: openid email profile
+      OAUTH2_PROXY_SKIP_PROVIDER_BUTTON: 'true'
+      OAUTH2_PROXY_UPSTREAMS: http://127.0.0.1:9001
+      OAUTH_ENABLED: 'true'
+    image: minio/minio:latest
+    labels:
+      gitops.oauth2.enabled: 'true'
+      gitops.oauth2.upstream: http://127.0.0.1:9001
+    networks:
+    - bitswan_network
+    restart: unless-stopped
+    volumes:
+    - demo-meeting-form-minio-data-data:/data
   minio-dev:
     command: server /data --console-address :9001
     container_name: demo-meeting-form__minio-dev
@@ -372,6 +446,16 @@ services:
     restart: unless-stopped
     volumes:
     - demo-meeting-form-minio-staging-data-data:/data
+  postgres:
+    container_name: demo-meeting-form__postgres
+    env_file:
+    - /gitops/secrets/postgres
+    image: postgres:16
+    networks:
+    - bitswan_network
+    restart: unless-stopped
+    volumes:
+    - demo-meeting-form-postgres-data-data:/var/lib/postgresql/data
   postgres-dev:
     container_name: demo-meeting-form__postgres-dev
     env_file:
@@ -399,6 +483,36 @@ services:
       OAUTH2_PROXY_OIDC_ISSUER_URL: https://keycloak.bitswan.ai/realms/master
       OAUTH2_PROXY_PROVIDER: keycloak-oidc
       OAUTH2_PROXY_REDIRECT_URL: https://demo-meeting-form-postgres-dev.nikita-sandbox.bswn.io/oauth2/callback
+      OAUTH2_PROXY_SCOPE: openid email profile
+      OAUTH2_PROXY_SKIP_PROVIDER_BUTTON: 'true'
+      OAUTH2_PROXY_UPSTREAMS: http://127.0.0.1:80
+      OAUTH_ENABLED: 'true'
+    image: dpage/pgadmin4:latest
+    labels:
+      gitops.oauth2.enabled: 'true'
+      gitops.oauth2.upstream: http://127.0.0.1:80
+    networks:
+    - bitswan_network
+    restart: unless-stopped
+    volumes:
+    - /gitops/secrets/pgadmin-servers.json:/pgadmin4/servers.json:ro
+  postgres-pgadmin:
+    container_name: demo-meeting-form__postgres-pgadmin
+    env_file:
+    - /gitops/secrets/postgres
+    environment:
+      BITSWAN_AUTOMATION_URL: https://demo-meeting-form-postgres.nikita-sandbox.bswn.io
+      OAUTH2_PROXY_CLIENT_ID: workspace-008e5dc9-ad56-422b-9b7a-38c709e6ebba-code-server-client
+      OAUTH2_PROXY_CLIENT_SECRET: UmvndhA9ohLVa2jtKxy31asm4CzFLOIn
+      OAUTH2_PROXY_CODE_CHALLENGE_METHOD: S256
+      OAUTH2_PROXY_COOKIE_SECRET: nqxxrX0JXVzuSyVpRIzNCy44WtR0sUWK
+      OAUTH2_PROXY_EMAIL_DOMAINS: '*'
+      OAUTH2_PROXY_HTTP_ADDRESS: 0.0.0.0:9999
+      OAUTH2_PROXY_MQTT_ALLOWED_GROUPS_TOPIC: /groups
+      OAUTH2_PROXY_OIDC_GROUPS_CLAIM: group_membership
+      OAUTH2_PROXY_OIDC_ISSUER_URL: https://keycloak.bitswan.ai/realms/master
+      OAUTH2_PROXY_PROVIDER: keycloak-oidc
+      OAUTH2_PROXY_REDIRECT_URL: https://demo-meeting-form-postgres.nikita-sandbox.bswn.io/oauth2/callback
       OAUTH2_PROXY_SCOPE: openid email profile
       OAUTH2_PROXY_SKIP_PROVIDER_BUTTON: 'true'
       OAUTH2_PROXY_UPSTREAMS: http://127.0.0.1:80
@@ -454,7 +568,9 @@ services:
     - /gitops/secrets/pgadmin-servers.json:/pgadmin4/servers.json:ro
 version: '3'
 volumes:
+  demo-meeting-form-minio-data-data: null
   demo-meeting-form-minio-dev-data-data: null
   demo-meeting-form-minio-staging-data-data: null
+  demo-meeting-form-postgres-data-data: null
   demo-meeting-form-postgres-dev-data-data: null
   demo-meeting-form-postgres-staging-data-data: null
