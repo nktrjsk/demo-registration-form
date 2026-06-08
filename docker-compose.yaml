@@ -14,7 +14,7 @@ services:
       BITSWAN_DEPLOYMENT_CONTEXT: demo-wt-demo-live-dev
       BITSWAN_DEPLOYMENT_ID: backend-wt-demo-demo-live-dev
       BITSWAN_DEPLOY_CHECKSUM: live-dev
-      BITSWAN_DEPLOY_TIME: '2026-06-08T09:01:40.666575Z'
+      BITSWAN_DEPLOY_TIME: '2026-06-08T09:01:59.223923Z'
       BITSWAN_GITOPS_DOMAIN: nikita-sandbox.bswn.io
       BITSWAN_URL_PREFIX: https://demo-meeting-form-
       BITSWAN_URL_SUFFIX: .nikita-sandbox.bswn.io
@@ -58,7 +58,7 @@ services:
       BITSWAN_DEPLOYMENT_CONTEXT: demo-dev
       BITSWAN_DEPLOYMENT_ID: backend-demo-dev
       BITSWAN_DEPLOY_CHECKSUM: 62e79c9416b399e5a7548d1c253899b43bb4f48f
-      BITSWAN_DEPLOY_TIME: '2026-06-08T09:01:40.138940Z'
+      BITSWAN_DEPLOY_TIME: '2026-06-08T09:01:58.711675Z'
       BITSWAN_GITOPS_DOMAIN: nikita-sandbox.bswn.io
       BITSWAN_URL_PREFIX: https://demo-meeting-form-
       BITSWAN_URL_SUFFIX: .nikita-sandbox.bswn.io
@@ -100,8 +100,8 @@ services:
       BITSWAN_AUTOMATION_URL: https://demo-meeting-form-backend-2a97-production.nikita-sandbox.bswn.io
       BITSWAN_DEPLOYMENT_CONTEXT: demo
       BITSWAN_DEPLOYMENT_ID: backend-demo
-      BITSWAN_DEPLOY_CHECKSUM: 2158abff1d58d38d15070152838acad9f5d5905c
-      BITSWAN_DEPLOY_TIME: '2026-06-08T09:01:39.897163Z'
+      BITSWAN_DEPLOY_CHECKSUM: 62e79c9416b399e5a7548d1c253899b43bb4f48f
+      BITSWAN_DEPLOY_TIME: '2026-06-08T09:01:58.135229Z'
       BITSWAN_GITOPS_DOMAIN: nikita-sandbox.bswn.io
       BITSWAN_URL_PREFIX: https://demo-meeting-form-
       BITSWAN_URL_SUFFIX: .nikita-sandbox.bswn.io
@@ -131,7 +131,7 @@ services:
         soft: 65536
     volumes:
     - /root/.config/bitswan/certauthorities:/usr/local/share/ca-certificates/custom:ro
-    - /root/.config/bitswan/workspaces/demo-meeting-form/gitops/2158abff1d58d38d15070152838acad9f5d5905c:/app/:ro
+    - /root/.config/bitswan/workspaces/demo-meeting-form/gitops/62e79c9416b399e5a7548d1c253899b43bb4f48f:/app/:ro
   demo-meeting-form-backend-2a97-staging:
     container_name: demo-meeting-form-backend-2a97-staging
     env_file:
@@ -144,7 +144,7 @@ services:
       BITSWAN_DEPLOYMENT_CONTEXT: demo-staging
       BITSWAN_DEPLOYMENT_ID: backend-demo-staging
       BITSWAN_DEPLOY_CHECKSUM: 62e79c9416b399e5a7548d1c253899b43bb4f48f
-      BITSWAN_DEPLOY_TIME: '2026-06-08T09:01:40.409943Z'
+      BITSWAN_DEPLOY_TIME: '2026-06-08T09:01:58.975691Z'
       BITSWAN_GITOPS_DOMAIN: nikita-sandbox.bswn.io
       BITSWAN_URL_PREFIX: https://demo-meeting-form-
       BITSWAN_URL_SUFFIX: .nikita-sandbox.bswn.io
@@ -184,7 +184,7 @@ services:
       BITSWAN_DEPLOYMENT_CONTEXT: demo-wt-demo-live-dev
       BITSWAN_DEPLOYMENT_ID: internal-frontend-wt-demo-demo-live-dev
       BITSWAN_DEPLOY_CHECKSUM: live-dev
-      BITSWAN_DEPLOY_TIME: '2026-06-08T09:01:42.672642Z'
+      BITSWAN_DEPLOY_TIME: '2026-06-08T09:02:01.144949Z'
       BITSWAN_GITOPS_DOMAIN: nikita-sandbox.bswn.io
       BITSWAN_URL_PREFIX: https://demo-meeting-form-
       BITSWAN_URL_SUFFIX: .nikita-sandbox.bswn.io
@@ -244,7 +244,7 @@ services:
       BITSWAN_DEPLOYMENT_CONTEXT: demo-dev
       BITSWAN_DEPLOYMENT_ID: internal-frontend-demo-dev
       BITSWAN_DEPLOY_CHECKSUM: 80a574ca70a320e749f5d3a3ffcece16a22fcc60
-      BITSWAN_DEPLOY_TIME: '2026-06-08T09:01:41.521768Z'
+      BITSWAN_DEPLOY_TIME: '2026-06-08T09:02:00.042374Z'
       BITSWAN_GITOPS_DOMAIN: nikita-sandbox.bswn.io
       BITSWAN_URL_PREFIX: https://demo-meeting-form-
       BITSWAN_URL_SUFFIX: .nikita-sandbox.bswn.io
@@ -303,7 +303,7 @@ services:
       BITSWAN_DEPLOYMENT_CONTEXT: demo
       BITSWAN_DEPLOYMENT_ID: internal-frontend-demo
       BITSWAN_DEPLOY_CHECKSUM: 80a574ca70a320e749f5d3a3ffcece16a22fcc60
-      BITSWAN_DEPLOY_TIME: '2026-06-08T09:01:40.945107Z'
+      BITSWAN_DEPLOY_TIME: '2026-06-08T09:01:59.485525Z'
       BITSWAN_GITOPS_DOMAIN: nikita-sandbox.bswn.io
       BITSWAN_URL_PREFIX: https://demo-meeting-form-
       BITSWAN_URL_SUFFIX: .nikita-sandbox.bswn.io
@@ -362,7 +362,7 @@ services:
       BITSWAN_DEPLOYMENT_CONTEXT: demo-staging
       BITSWAN_DEPLOYMENT_ID: internal-frontend-demo-staging
       BITSWAN_DEPLOY_CHECKSUM: 80a574ca70a320e749f5d3a3ffcece16a22fcc60
-      BITSWAN_DEPLOY_TIME: '2026-06-08T09:01:42.096594Z'
+      BITSWAN_DEPLOY_TIME: '2026-06-08T09:02:00.620944Z'
       BITSWAN_GITOPS_DOMAIN: nikita-sandbox.bswn.io
       BITSWAN_URL_PREFIX: https://demo-meeting-form-
       BITSWAN_URL_SUFFIX: .nikita-sandbox.bswn.io
