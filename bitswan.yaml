@@ -27,6 +27,13 @@ deployments:
     context: wt-demo-demo
     relative_path: worktrees/demo/demo/backend
     stage: live-dev
+  backend-wt-demo-new-demo-live-dev:
+    active: true
+    automation_name: backend
+    checksum: live-dev
+    context: wt-demo-new-demo
+    relative_path: worktrees/demo-new/demo/backend
+    stage: live-dev
   internal-frontend-demo:
     active: true
     automation_name: internal-frontend
