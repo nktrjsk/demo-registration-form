@@ -158,6 +158,14 @@ export interface MeetingDetails {
   attendees: Attendee[]
 }
 
+export type AttendanceStatus = 'yes' | 'no' | 'no_response'
+
+export interface RosterEntry {
+  email: string
+  display_name: string
+  status: AttendanceStatus
+}
+
 // Backend API client
 class BackendClient {
   baseUrl: string | null
@@ -210,6 +218,13 @@ class BackendClient {
   put<T>(path: string, data: unknown): Promise<T> {
     return this.request<T>(path, {
       method: 'PUT',
+      body: JSON.stringify(data),
+    })
+  }
+
+  patch<T>(path: string, data: unknown): Promise<T> {
+    return this.request<T>(path, {
+      method: 'PATCH',
       body: JSON.stringify(data),
     })
   }

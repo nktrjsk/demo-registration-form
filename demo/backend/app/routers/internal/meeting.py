@@ -8,7 +8,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.requests import Request
 
-from app.auth import get_email_from_request, require_admin
+from app.auth import get_email_from_request, is_admin_claims, require_admin
 from app.auto_create import now_local
 from app.database import get_db
 from app.models import (
@@ -112,6 +112,30 @@ async def create_person(
         raise HTTPException(status_code=422, detail="display_name required")
     p = Person(display_name=display_name, email=None)
     db.add(p)
+    await db.commit()
+    await db.refresh(p)
+    return _person_to_dict(p)
+
+
+@router.patch("/people/{person_id}")
+async def rename_person(
+    person_id: int,
+    request: Request,
+    payload: dict = Body(...),
+    db: AsyncSession = Depends(get_db),
+):
+    """Admin-only: rename a Person. Used to repair display_name when the
+    OIDC claim chain produces only an email (e.g. realms that don't
+    populate name/given_name)."""
+    if not is_admin_claims(request.state.claims):
+        raise HTTPException(status_code=403, detail="Admin role required")
+    display_name = str(payload.get("display_name", "")).strip()
+    if not display_name:
+        raise HTTPException(status_code=422, detail="display_name required")
+    p = await db.get(Person, person_id)
+    if p is None:
+        raise HTTPException(status_code=404, detail="Person not found")
+    p.display_name = display_name
     await db.commit()
     await db.refresh(p)
     return _person_to_dict(p)
@@ -527,24 +551,38 @@ async def admin_get_user_entry(
 
 async def _resolved_persons_by_first_seen(
     db: AsyncSession, end_of_day: datetime
-) -> list[str]:
+) -> list[tuple[str, str]]:
+    """Return (email, display_name) pairs for resolved Persons who had
+    logged in by `end_of_day`, ordered by first_seen_at."""
     rows = (
         await db.execute(
-            select(Person.email)
+            select(Person.email, Person.display_name)
             .where(Person.email.is_not(None), Person.first_seen_at <= end_of_day)
             .order_by(Person.first_seen_at)
         )
     ).all()
-    return [row[0] for row in rows]
+    return [(email, name) for (email, name) in rows]
 
 
 @router.get("/meeting/{meeting_id}/attendees")
 async def get_attendees(meeting_id: int, db: AsyncSession = Depends(get_db)):
+    """Roster for the current/historic meeting.
+
+    Returns every resolved Person known by the end of the meeting day,
+    each with a 3-state `status`:
+    - `yes`         — user submitted an entry with attending=True
+    - `no`          — user submitted an entry with attending=False
+    - `no_response` — user never opened the form for this meeting
+
+    The third state matters because the form defaults aren't an answer:
+    a colleague who hasn't logged in this week is different from one
+    who's explicitly skipping.
+    """
     meeting = await db.get(MeetingInstance, meeting_id)
     if meeting is None:
         raise HTTPException(status_code=404, detail="Meeting not found")
     end_of_day = datetime.combine(meeting.meeting_date, time(23, 59, 59))
-    emails = await _resolved_persons_by_first_seen(db, end_of_day)
+    roster = await _resolved_persons_by_first_seen(db, end_of_day)
     entries = (
         await db.execute(
             select(MeetingEntry.user_email, MeetingEntry.attending).where(
@@ -553,10 +591,20 @@ async def get_attendees(meeting_id: int, db: AsyncSession = Depends(get_db)):
         )
     ).all()
     attending_by = {email: bool(attending) for (email, attending) in entries}
+
+    def _status_for(email: str) -> str:
+        if email not in attending_by:
+            return "no_response"
+        return "yes" if attending_by[email] else "no"
+
     return {
         "attendees": [
-            {"email": email, "attending": attending_by.get(email, False)}
-            for email in emails
+            {
+                "email": email,
+                "display_name": display_name,
+                "status": _status_for(email),
+            }
+            for (email, display_name) in roster
         ]
     }
 
@@ -578,7 +626,7 @@ async def get_meeting_details(meeting_id: int, db: AsyncSession = Depends(get_db
     discussed_paired = await _projects_with_leaders(db, discussed_query)
 
     end_of_day = datetime.combine(meeting.meeting_date, time(23, 59, 59))
-    roster_emails = await _resolved_persons_by_first_seen(db, end_of_day)
+    roster = await _resolved_persons_by_first_seen(db, end_of_day)
 
     entries = (
         await db.execute(
@@ -601,7 +649,7 @@ async def get_meeting_details(meeting_id: int, db: AsyncSession = Depends(get_db
         pe_by_entry_id.setdefault(pe.meeting_entry_id, []).append(pe)
 
     attendees = []
-    for email in roster_emails:
+    for email, _display_name in roster:
         entry = entries_by_email.get(email)
         if entry is None:
             attendees.append({"email": email, "attending": False, "project_entries": []})

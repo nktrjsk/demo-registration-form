@@ -105,7 +105,15 @@ async def record_login(email: str, session, display_name: str | None = None) -> 
         await session.execute(select(Person).where(Person.email == email))
     ).scalar_one_or_none()
     if existing is not None:
-        if display_name and existing.display_name != display_name:
+        # Only refresh display_name from the claim while the row still
+        # holds the email-fallback we'd have written ourselves. Once it
+        # diverges from email — either an earlier claim with a real
+        # name or an admin rename — treat it as curated and leave it.
+        if (
+            display_name
+            and existing.display_name == email
+            and existing.display_name != display_name
+        ):
             existing.display_name = display_name
         if existing.first_seen_at is None:
             existing.first_seen_at = now
@@ -133,6 +141,24 @@ async def record_login(email: str, session, display_name: str | None = None) -> 
     await session.commit()
 
 
+def _display_name_from_claims(claims: dict) -> str | None:
+    """Pick the best human-readable name from OIDC claims.
+
+    Preference order: `name` → `given_name`+`family_name` → `preferred_username`.
+    Falls through when a claim is missing or empty so realms that only
+    populate first/last name still yield a usable display name.
+    """
+    name = (claims.get("name") or "").strip()
+    if name:
+        return name
+    given = (claims.get("given_name") or "").strip()
+    family = (claims.get("family_name") or "").strip()
+    if given or family:
+        return " ".join(part for part in (given, family) if part)
+    preferred = (claims.get("preferred_username") or "").strip()
+    return preferred or None
+
+
 async def require_auth(
     request: Request,
     credentials: HTTPAuthorizationCredentials | None = Depends(security),
@@ -150,7 +176,7 @@ async def require_auth(
     if email:
         from app.database import async_session
 
-        display_name = claims.get("name") or claims.get("preferred_username")
+        display_name = _display_name_from_claims(claims)
         async with async_session() as db:
             await record_login(email, db, display_name=display_name)
 

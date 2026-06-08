@@ -11,9 +11,10 @@ import {
 } from './api'
 import { MeetingForm } from './MeetingForm'
 import { HistoryTab } from './HistoryTab'
+import { PeopleAdmin } from './PeopleAdmin'
 import './App.css'
 
-type Tab = 'current' | 'history'
+type Tab = 'current' | 'history' | 'people'
 
 const WEEKDAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'] as const
 
@@ -149,10 +150,19 @@ function App() {
         >
           {t('tabs.history')}
         </button>
+        {isAdmin && (
+          <button
+            className={tab === 'people' ? 'tab active' : 'tab'}
+            onClick={() => setTab('people')}
+          >
+            {t('tabs.people')}
+          </button>
+        )}
       </nav>
 
-      {tab === 'current' && <MeetingForm />}
+      {tab === 'current' && <MeetingForm isAdmin={isAdmin} />}
       {tab === 'history' && <HistoryTab isAdmin={isAdmin} />}
+      {tab === 'people' && isAdmin && <PeopleAdmin />}
 
       {schedule && (
         <div className="card">

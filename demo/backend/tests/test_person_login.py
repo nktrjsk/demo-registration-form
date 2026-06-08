@@ -184,14 +184,31 @@ def test_login_with_no_matching_placeholder_creates_new():
         _reset()
 
 
-def test_login_refreshes_display_name_on_existing_record():
+def test_login_heals_email_fallback_with_claim_name():
+    """First login had no usable claim → display_name=email. Once the
+    realm starts returning a real name, the next login adopts it."""
     _reset()
     try:
-        _record(ALICE_EMAIL, "Old Name")
-        _record(ALICE_EMAIL, "New Name")
+        _record(ALICE_EMAIL, ALICE_EMAIL)  # email-fallback state
+        _record(ALICE_EMAIL, ALICE_NAME)
         ps = _all_persons()
         assert len(ps) == 1
-        assert ps[0]["display_name"] == "New Name"
+        assert ps[0]["display_name"] == ALICE_NAME
+    finally:
+        _reset()
+
+
+def test_login_does_not_overwrite_curated_display_name():
+    """Once display_name diverges from email — either via an earlier
+    real-name claim or an admin rename — claims must not stomp it on
+    subsequent logins, or admin curation would be pointless."""
+    _reset()
+    try:
+        _record(ALICE_EMAIL, "Curated Name")
+        _record(ALICE_EMAIL, "Some Other Claim Name")
+        ps = _all_persons()
+        assert len(ps) == 1
+        assert ps[0]["display_name"] == "Curated Name"
     finally:
         _reset()
 

@@ -8,16 +8,20 @@ interface Props {
   onChange: (p: Person | null) => void
   placeholder?: string
   id?: string
+  isAdmin?: boolean
 }
 
 
-export function LeaderPicker({ value, onChange, placeholder, id }: Props) {
+export function LeaderPicker({ value, onChange, placeholder, id, isAdmin }: Props) {
   const { t } = useTranslation()
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
   const [people, setPeople] = useState<Person[] | null>(null)
   const [creating, setCreating] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [editingId, setEditingId] = useState<number | null>(null)
+  const [editDraft, setEditDraft] = useState('')
+  const [savingEdit, setSavingEdit] = useState(false)
   const wrapRef = useRef<HTMLDivElement>(null)
 
   const reload = async () => {
@@ -86,6 +90,38 @@ export function LeaderPicker({ value, onChange, placeholder, id }: Props) {
     }
   }
 
+  const beginEdit = (p: Person) => {
+    setEditingId(p.id)
+    setEditDraft(p.display_name)
+    setError(null)
+  }
+
+  const cancelEdit = () => {
+    setEditingId(null)
+    setEditDraft('')
+  }
+
+  const saveEdit = async () => {
+    if (editingId === null) return
+    const name = editDraft.trim()
+    if (!name) return
+    setSavingEdit(true)
+    setError(null)
+    try {
+      const updated = await backend.patch<Person>(`/people/${editingId}`, {
+        display_name: name,
+      })
+      setPeople(prev => (prev ? prev.map(p => p.id === updated.id ? updated : p)
+        .sort((a, b) => a.display_name.localeCompare(b.display_name)) : prev))
+      if (value?.id === updated.id) onChange(updated)
+      cancelEdit()
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e))
+    } finally {
+      setSavingEdit(false)
+    }
+  }
+
   const displayInInput = open ? query : (value?.display_name ?? '')
 
   return (
@@ -116,22 +152,67 @@ export function LeaderPicker({ value, onChange, placeholder, id }: Props) {
             <li className="leader-picker__empty">{t('leaderPicker.empty')}</li>
           )}
           {filtered.map(p => (
-            <li key={p.id}>
-              <button
-                type="button"
-                role="option"
-                aria-selected={p.id === value?.id}
-                className={p.id === value?.id ? 'selected' : ''}
-                onMouseDown={e => e.preventDefault()}
-                onClick={() => pick(p)}
-              >
-                <span className="leader-picker__name">{p.display_name}</span>
-                {p.email ? (
-                  <span className="leader-picker__email">{p.email}</span>
-                ) : (
-                  <span className="leader-picker__badge">{t('leaderPicker.placeholderBadge')}</span>
-                )}
-              </button>
+            <li key={p.id} className="leader-picker__row">
+              {editingId === p.id ? (
+                <div className="leader-picker__edit" onMouseDown={e => e.stopPropagation()}>
+                  <input
+                    type="text"
+                    autoFocus
+                    value={editDraft}
+                    onChange={e => setEditDraft(e.target.value)}
+                    onKeyDown={e => {
+                      if (e.key === 'Enter') { e.preventDefault(); saveEdit() }
+                      if (e.key === 'Escape') { e.preventDefault(); cancelEdit() }
+                    }}
+                  />
+                  <button
+                    type="button"
+                    className="primary"
+                    disabled={savingEdit || !editDraft.trim()}
+                    onMouseDown={e => e.preventDefault()}
+                    onClick={saveEdit}
+                  >
+                    {savingEdit ? t('leaderPicker.saving') : t('leaderPicker.save')}
+                  </button>
+                  <button
+                    type="button"
+                    onMouseDown={e => e.preventDefault()}
+                    onClick={cancelEdit}
+                  >
+                    {t('leaderPicker.cancel')}
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    role="option"
+                    aria-selected={p.id === value?.id}
+                    className={p.id === value?.id ? 'selected' : ''}
+                    onMouseDown={e => e.preventDefault()}
+                    onClick={() => pick(p)}
+                  >
+                    <span className="leader-picker__name">{p.display_name}</span>
+                    {p.email ? (
+                      <span className="leader-picker__email">{p.email}</span>
+                    ) : (
+                      <span className="leader-picker__badge">{t('leaderPicker.placeholderBadge')}</span>
+                    )}
+                  </button>
+                  {isAdmin && (
+                    <button
+                      type="button"
+                      className="leader-picker__edit-btn"
+                      aria-label={t('leaderPicker.rename')}
+                      title={t('leaderPicker.rename')}
+                      onMouseDown={e => e.preventDefault()}
+                      onClick={() => beginEdit(p)}
+                    >
+                      ✎
+                    </button>
+                  )}
+                </>
+              )}
             </li>
           ))}
           {query.trim() && !exactNameExists && (
