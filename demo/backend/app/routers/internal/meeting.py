@@ -429,6 +429,10 @@ async def _apply_entry_update(
     # When absent, keep the existing value (default False on new rows).
     attending_provided = "attending" in payload
     attending = bool(payload.get("attending", False))
+    # project_entries is also optional: when the key is absent we leave the
+    # user's existing notes alone. This lets the admin flip just attendance
+    # without having to re-send (and risk clobbering) a user's notes.
+    project_entries_provided = "project_entries" in payload
     raw_entries = payload.get("project_entries", []) or []
 
     incoming: dict[int, str] = {}
@@ -460,29 +464,30 @@ async def _apply_entry_update(
     elif attending_provided:
         entry.attending = attending
 
-    existing = (
-        await db.execute(
-            select(ProjectEntry).where(ProjectEntry.meeting_entry_id == entry.id)
-        )
-    ).scalars().all()
-    existing_by_pid = {pe.project_id: pe for pe in existing}
-    for pid_existing, pe in existing_by_pid.items():
-        if pid_existing not in incoming:
-            await db.delete(pe)
-    for pid, desc_text in incoming.items():
-        if pid in existing_by_pid:
-            existing_by_pid[pid].description = desc_text
-        else:
-            db.add(
-                ProjectEntry(
-                    meeting_entry_id=entry.id,
-                    project_id=pid,
-                    description=desc_text,
-                )
+    if project_entries_provided:
+        existing = (
+            await db.execute(
+                select(ProjectEntry).where(ProjectEntry.meeting_entry_id == entry.id)
             )
+        ).scalars().all()
+        existing_by_pid = {pe.project_id: pe for pe in existing}
+        for pid_existing, pe in existing_by_pid.items():
+            if pid_existing not in incoming:
+                await db.delete(pe)
+        for pid, desc_text in incoming.items():
+            if pid in existing_by_pid:
+                existing_by_pid[pid].description = desc_text
+            else:
+                db.add(
+                    ProjectEntry(
+                        meeting_entry_id=entry.id,
+                        project_id=pid,
+                        description=desc_text,
+                    )
+                )
 
-    for pid in incoming:
-        await _ensure_subscription(db, user_email, pid)
+        for pid in incoming:
+            await _ensure_subscription(db, user_email, pid)
 
     await db.commit()
     return await _load_entry(db, meeting_id, user_email)

@@ -246,6 +246,41 @@ def test_admin_can_set_attending_via_own_my_entry(make_client):
         _reset()
 
 
+def test_admin_can_flip_attending_without_wiping_project_entries(make_client):
+    """Admin updates attendance only (no `project_entries` key). The user's
+    existing notes must be preserved — this is what the admin-attendance
+    card relies on."""
+    _reset()
+    try:
+        meeting_id, project_id = _seed_meeting_with_project()
+        # User writes a note first.
+        with make_client(BOB, admin=False) as bob:
+            r = bob.put(
+                f"/internal/meeting/{meeting_id}/my-entry",
+                json={
+                    "project_entries": [
+                        {"project_id": project_id, "description": "wrote up CETIN"}
+                    ],
+                },
+            )
+            assert r.status_code == 200
+
+        # Admin flips attendance without sending project_entries.
+        with make_client(ALICE, admin=True) as admin:
+            r = admin.put(
+                f"/internal/meeting/{meeting_id}/entries/{BOB}",
+                json={"attending": True},
+            )
+            assert r.status_code == 200
+            data = r.json()
+            assert data["attending"] is True
+            assert data["project_entries"] == [
+                {"project_id": project_id, "description": "wrote up CETIN"}
+            ]
+    finally:
+        _reset()
+
+
 def test_admin_set_attending_persists_when_user_updates_projects(make_client):
     """End-to-end: admin marks Bob attending; Bob then writes project notes
     (without sending attending). Bob's attendance must stay True."""

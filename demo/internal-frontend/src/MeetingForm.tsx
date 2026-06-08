@@ -346,7 +346,13 @@ export function MeetingForm({ isAdmin }: MeetingFormProps = {}) {
   }
   if (!entry) return null
 
+  const refreshRoster = async () => {
+    const r = await backend.get<{ attendees: RosterEntry[] }>(`/meeting/${meeting.id}/attendees`)
+    setRoster(r.attendees)
+  }
+
   return (
+    <>
     <div className="card">
       <h2>{formatMeetingDate(meeting.meeting_date, i18n.language)}</h2>
       <p className="muted">
@@ -468,26 +474,6 @@ export function MeetingForm({ isAdmin }: MeetingFormProps = {}) {
         {error && <p className="expired">{error}</p>}
       </div>
 
-      {roster !== null && (
-        <section className="roster">
-          <h3>{t('roster.title')}</h3>
-          {roster.length === 0 ? (
-            <p className="muted">{t('roster.empty')}</p>
-          ) : (
-            <ul className="roster-list">
-              {roster.map(r => (
-                <li key={r.email} className="roster-row">
-                  <span className="roster-name">{r.display_name}</span>
-                  <span className={`roster-status roster-status--${r.status}`}>
-                    {t(`roster.status.${r.status}`)}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
-      )}
-
       {details !== null && (
         <ColleaguesNotes
           attendees={details.attendees}
@@ -496,6 +482,83 @@ export function MeetingForm({ isAdmin }: MeetingFormProps = {}) {
           selfEmail={entry.user_email}
         />
       )}
+    </div>
+    {isAdmin && roster !== null && (
+      <AdminAttendanceCard
+        meetingId={meeting.id}
+        roster={roster}
+        onChange={refreshRoster}
+      />
+    )}
+    </>
+  )
+}
+
+
+function AdminAttendanceCard({
+  meetingId,
+  roster,
+  onChange,
+}: {
+  meetingId: number
+  roster: RosterEntry[]
+  onChange: () => Promise<void>
+}) {
+  const { t } = useTranslation()
+  const [busy, setBusy] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
+
+  const setAttendance = async (email: string, attending: boolean) => {
+    setBusy(email)
+    setError(null)
+    try {
+      // Omitting project_entries leaves the user's notes untouched.
+      await backend.put(`/meeting/${meetingId}/entries/${encodeURIComponent(email)}`, {
+        attending,
+      })
+      await onChange()
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e))
+    } finally {
+      setBusy(null)
+    }
+  }
+
+  return (
+    <div className="card admin-attendance" data-testid="admin-attendance-card">
+      <h2>{t('adminAttendance.title')}</h2>
+      <p className="muted">{t('adminAttendance.description')}</p>
+      {roster.length === 0 ? (
+        <p className="muted">{t('adminAttendance.empty')}</p>
+      ) : (
+        <ul className="admin-attendance-list">
+          {roster.map(r => (
+            <li key={r.email} className="admin-attendance-row">
+              <span className="admin-attendance-name">{r.display_name}</span>
+              <span className={`roster-status roster-status--${r.status}`}>
+                {t(`roster.status.${r.status}`)}
+              </span>
+              <span className="admin-attendance-buttons">
+                <button
+                  className={r.status === 'yes' ? 'primary' : ''}
+                  disabled={busy === r.email}
+                  onClick={() => setAttendance(r.email, true)}
+                >
+                  {t('adminAttendance.attending')}
+                </button>{' '}
+                <button
+                  className={r.status === 'no' ? 'primary' : ''}
+                  disabled={busy === r.email}
+                  onClick={() => setAttendance(r.email, false)}
+                >
+                  {t('adminAttendance.notAttending')}
+                </button>
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
+      {error && <p className="expired">{error}</p>}
     </div>
   )
 }

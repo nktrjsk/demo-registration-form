@@ -6,6 +6,10 @@ import os
 # poison tests that assert on meeting list contents. Individual tests that
 # need the backfill enable it via monkeypatch.
 os.environ.setdefault("BITSWAN_DISABLE_SCHEDULER", "1")
+# Tests must not auto-seed dummy Persons via the app's startup hook —
+# the seed would race with per-test fixtures that clear and repopulate
+# the Person table. Tests that exercise the seed itself opt back in.
+os.environ.setdefault("BITSWAN_DISABLE_DEV_SEED", "1")
 
 import pytest
 from selenium import webdriver
