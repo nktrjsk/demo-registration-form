@@ -1,0 +1,169 @@
+Build started at 2026-06-08T08:32:35.491692
+Step 1/9 : FROM python:3.12-slim
+ ---> 090ba77e2958
+Step 2/9 : ENV PYTHONPYCACHEPREFIX=/tmp/pycache
+ ---> Using cache
+ ---> b661381675d3
+Step 3/9 : WORKDIR /deps
+ ---> Using cache
+ ---> 652694e974d4
+Step 4/9 : COPY requirements.txt ./
+ ---> 0ea163d2b840
+Step 5/9 : RUN pip install --no-cache-dir -r requirements.txt
+ ---> Running in 63dcb2048d3c
+Collecting fastapi>=0.109.0 (from -r requirements.txt (line 1))
+  Downloading fastapi-0.136.3-py3-none-any.whl.metadata (27 kB)
+Collecting uvicorn>=0.27.0 (from uvicorn[standard]>=0.27.0->-r requirements.txt (line 2))
+  Downloading uvicorn-0.49.0-py3-none-any.whl.metadata (6.7 kB)
+Collecting PyJWT>=2.8.0 (from PyJWT[crypto]>=2.8.0->-r requirements.txt (line 3))
+  Downloading pyjwt-2.13.0-py3-none-any.whl.metadata (3.4 kB)
+Collecting httpx>=0.24.0 (from -r requirements.txt (line 4))
+  Downloading httpx-0.28.1-py3-none-any.whl.metadata (7.1 kB)
+Collecting asyncpg>=0.29.0 (from -r requirements.txt (line 5))
+  Downloading asyncpg-0.31.0-cp312-cp312-manylinux_2_28_x86_64.whl.metadata (4.4 kB)
+Collecting sqlalchemy>=2.0.0 (from sqlalchemy[asyncio]>=2.0.0->-r requirements.txt (line 6))
+  Downloading sqlalchemy-2.0.50-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (9.5 kB)
+Collecting alembic>=1.13.0 (from -r requirements.txt (line 7))
+  Downloading alembic-1.18.4-py3-none-any.whl.metadata (7.2 kB)
+Collecting minio>=7.2.0 (from -r requirements.txt (line 8))
+  Downloading minio-7.2.20-py3-none-any.whl.metadata (6.5 kB)
+Collecting python-multipart>=0.0.6 (from -r requirements.txt (line 9))
+  Downloading python_multipart-0.0.32-py3-none-any.whl.metadata (2.1 kB)
+Collecting apscheduler>=3.10.0 (from -r requirements.txt (line 10))
+  Downloading apscheduler-3.11.2-py3-none-any.whl.metadata (6.4 kB)
+Collecting pytz>=2024.1 (from -r requirements.txt (line 11))
+  Downloading pytz-2026.2-py2.py3-none-any.whl.metadata (22 kB)
+Collecting starlette>=0.46.0 (from fastapi>=0.109.0->-r requirements.txt (line 1))
+  Downloading starlette-1.2.1-py3-none-any.whl.metadata (6.3 kB)
+Collecting pydantic>=2.9.0 (from fastapi>=0.109.0->-r requirements.txt (line 1))
+  Downloading pydantic-2.13.4-py3-none-any.whl.metadata (109 kB)
+Collecting typing-extensions>=4.8.0 (from fastapi>=0.109.0->-r requirements.txt (line 1))
+  Downloading typing_extensions-4.15.0-py3-none-any.whl.metadata (3.3 kB)
+Collecting typing-inspection>=0.4.2 (from fastapi>=0.109.0->-r requirements.txt (line 1))
+  Downloading typing_inspection-0.4.2-py3-none-any.whl.metadata (2.6 kB)
+Collecting annotated-doc>=0.0.2 (from fastapi>=0.109.0->-r requirements.txt (line 1))
+  Downloading annotated_doc-0.0.4-py3-none-any.whl.metadata (6.6 kB)
+Collecting click>=7.0 (from uvicorn>=0.27.0->uvicorn[standard]>=0.27.0->-r requirements.txt (line 2))
+  Downloading click-8.4.1-py3-none-any.whl.metadata (2.6 kB)
+Collecting h11>=0.8 (from uvicorn>=0.27.0->uvicorn[standard]>=0.27.0->-r requirements.txt (line 2))
+  Downloading h11-0.16.0-py3-none-any.whl.metadata (8.3 kB)
+Collecting anyio (from httpx>=0.24.0->-r requirements.txt (line 4))
+  Downloading anyio-4.13.0-py3-none-any.whl.metadata (4.5 kB)
+Collecting certifi (from httpx>=0.24.0->-r requirements.txt (line 4))
+  Downloading certifi-2026.5.20-py3-none-any.whl.metadata (2.5 kB)
+Collecting httpcore==1.* (from httpx>=0.24.0->-r requirements.txt (line 4))
+  Downloading httpcore-1.0.9-py3-none-any.whl.metadata (21 kB)
+Collecting idna (from httpx>=0.24.0->-r requirements.txt (line 4))
+  Downloading idna-3.18-py3-none-any.whl.metadata (6.1 kB)
+Collecting greenlet>=1 (from sqlalchemy>=2.0.0->sqlalchemy[asyncio]>=2.0.0->-r requirements.txt (line 6))
+  Downloading greenlet-3.5.1-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl.metadata (3.8 kB)
+Collecting Mako (from alembic>=1.13.0->-r requirements.txt (line 7))
+  Downloading mako-1.3.12-py3-none-any.whl.metadata (2.9 kB)
+Collecting argon2-cffi (from minio>=7.2.0->-r requirements.txt (line 8))
+  Downloading argon2_cffi-25.1.0-py3-none-any.whl.metadata (4.1 kB)
+Collecting pycryptodome (from minio>=7.2.0->-r requirements.txt (line 8))
+  Downloading pycryptodome-3.23.0-cp37-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (3.4 kB)
+Collecting urllib3 (from minio>=7.2.0->-r requirements.txt (line 8))
+  Downloading urllib3-2.7.0-py3-none-any.whl.metadata (6.9 kB)
+Collecting tzlocal>=3.0 (from apscheduler>=3.10.0->-r requirements.txt (line 10))
+  Downloading tzlocal-5.3.1-py3-none-any.whl.metadata (7.6 kB)
+Collecting cryptography>=3.4.0 (from PyJWT[crypto]>=2.8.0->-r requirements.txt (line 3))
+  Downloading cryptography-48.0.0-cp311-abi3-manylinux_2_34_x86_64.whl.metadata (4.3 kB)
+Collecting httptools>=0.8.0 (from uvicorn[standard]>=0.27.0->-r requirements.txt (line 2))
+  Downloading httptools-0.8.0-cp312-cp312-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl.metadata (3.5 kB)
+Collecting python-dotenv>=0.13 (from uvicorn[standard]>=0.27.0->-r requirements.txt (line 2))
+  Downloading python_dotenv-1.2.2-py3-none-any.whl.metadata (27 kB)
+Collecting pyyaml>=5.1 (from uvicorn[standard]>=0.27.0->-r requirements.txt (line 2))
+  Downloading pyyaml-6.0.3-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (2.4 kB)
+Collecting uvloop>=0.15.1 (from uvicorn[standard]>=0.27.0->-r requirements.txt (line 2))
+  Downloading uvloop-0.22.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (4.9 kB)
+Collecting watchfiles>=0.20 (from uvicorn[standard]>=0.27.0->-r requirements.txt (line 2))
+  Downloading watchfiles-1.2.0-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (4.9 kB)
+Collecting websockets>=10.4 (from uvicorn[standard]>=0.27.0->-r requirements.txt (line 2))
+  Downloading websockets-16.0-cp312-cp312-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl.metadata (6.8 kB)
+Collecting cffi>=2.0.0 (from cryptography>=3.4.0->PyJWT[crypto]>=2.8.0->-r requirements.txt (line 3))
+  Downloading cffi-2.0.0-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (2.6 kB)
+Collecting annotated-types>=0.6.0 (from pydantic>=2.9.0->fastapi>=0.109.0->-r requirements.txt (line 1))
+  Downloading annotated_types-0.7.0-py3-none-any.whl.metadata (15 kB)
+Collecting pydantic-core==2.46.4 (from pydantic>=2.9.0->fastapi>=0.109.0->-r requirements.txt (line 1))
+  Downloading pydantic_core-2.46.4-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (6.6 kB)
+Collecting argon2-cffi-bindings (from argon2-cffi->minio>=7.2.0->-r requirements.txt (line 8))
+  Downloading argon2_cffi_bindings-25.1.0-cp39-abi3-manylinux_2_26_x86_64.manylinux_2_28_x86_64.whl.metadata (7.4 kB)
+Collecting MarkupSafe>=0.9.2 (from Mako->alembic>=1.13.0->-r requirements.txt (line 7))
+  Downloading markupsafe-3.0.3-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (2.7 kB)
+Collecting pycparser (from cffi>=2.0.0->cryptography>=3.4.0->PyJWT[crypto]>=2.8.0->-r requirements.txt (line 3))
+  Downloading pycparser-3.0-py3-none-any.whl.metadata (8.2 kB)
+Downloading fastapi-0.136.3-py3-none-any.whl (117 kB)
+Downloading uvicorn-0.49.0-py3-none-any.whl (71 kB)
+Downloading pyjwt-2.13.0-py3-none-any.whl (31 kB)
+Downloading httpx-0.28.1-py3-none-any.whl (73 kB)
+Downloading httpcore-1.0.9-py3-none-any.whl (78 kB)
+Downloading asyncpg-0.31.0-cp312-cp312-manylinux_2_28_x86_64.whl (3.5 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 3.5/3.5 MB 118.4 MB/s eta 0:00:00
+Downloading sqlalchemy-2.0.50-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (3.4 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 3.4/3.4 MB 178.3 MB/s eta 0:00:00
+Downloading alembic-1.18.4-py3-none-any.whl (263 kB)
+Downloading minio-7.2.20-py3-none-any.whl (93 kB)
+Downloading python_multipart-0.0.32-py3-none-any.whl (30 kB)
+Downloading apscheduler-3.11.2-py3-none-any.whl (64 kB)
+Downloading pytz-2026.2-py2.py3-none-any.whl (510 kB)
+Downloading annotated_doc-0.0.4-py3-none-any.whl (5.3 kB)
+Downloading click-8.4.1-py3-none-any.whl (116 kB)
+Downloading cryptography-48.0.0-cp311-abi3-manylinux_2_34_x86_64.whl (4.7 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 4.7/4.7 MB 181.8 MB/s eta 0:00:00
+Downloading greenlet-3.5.1-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl (611 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 611.4/611.4 kB 421.6 MB/s eta 0:00:00
+Downloading h11-0.16.0-py3-none-any.whl (37 kB)
+Downloading httptools-0.8.0-cp312-cp312-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (523 kB)
+Downloading pydantic-2.13.4-py3-none-any.whl (472 kB)
+Downloading pydantic_core-2.46.4-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (2.1 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 2.1/2.1 MB 197.2 MB/s eta 0:00:00
+Downloading python_dotenv-1.2.2-py3-none-any.whl (22 kB)
+Downloading pyyaml-6.0.3-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (807 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 807.9/807.9 kB 482.5 MB/s eta 0:00:00
+Downloading starlette-1.2.1-py3-none-any.whl (73 kB)
+Downloading anyio-4.13.0-py3-none-any.whl (114 kB)
+Downloading idna-3.18-py3-none-any.whl (65 kB)
+Downloading typing_extensions-4.15.0-py3-none-any.whl (44 kB)
+Downloading typing_inspection-0.4.2-py3-none-any.whl (14 kB)
+Downloading tzlocal-5.3.1-py3-none-any.whl (18 kB)
+Downloading uvloop-0.22.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (4.4 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 4.4/4.4 MB 194.1 MB/s eta 0:00:00
+Downloading watchfiles-1.2.0-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (456 kB)
+Downloading websockets-16.0-cp312-cp312-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (184 kB)
+Downloading argon2_cffi-25.1.0-py3-none-any.whl (14 kB)
+Downloading certifi-2026.5.20-py3-none-any.whl (134 kB)
+Downloading mako-1.3.12-py3-none-any.whl (78 kB)
+Downloading pycryptodome-3.23.0-cp37-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (2.3 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 2.3/2.3 MB 204.1 MB/s eta 0:00:00
+Downloading urllib3-2.7.0-py3-none-any.whl (131 kB)
+Downloading annotated_types-0.7.0-py3-none-any.whl (13 kB)
+Downloading cffi-2.0.0-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (219 kB)
+Downloading markupsafe-3.0.3-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (22 kB)
+Downloading argon2_cffi_bindings-25.1.0-cp39-abi3-manylinux_2_26_x86_64.manylinux_2_28_x86_64.whl (87 kB)
+Downloading pycparser-3.0-py3-none-any.whl (48 kB)
+Installing collected packages: pytz, websockets, uvloop, urllib3, tzlocal, typing-extensions, pyyaml, python-multipart, python-dotenv, PyJWT, pycryptodome, pycparser, MarkupSafe, idna, httptools, h11, greenlet, click, certifi, asyncpg, annotated-types, annotated-doc, uvicorn, typing-inspection, sqlalchemy, pydantic-core, Mako, httpcore, cffi, apscheduler, anyio, watchfiles, starlette, pydantic, httpx, cryptography, argon2-cffi-bindings, alembic, fastapi, argon2-cffi, minio
+Successfully installed Mako-1.3.12 MarkupSafe-3.0.3 PyJWT-2.13.0 alembic-1.18.4 annotated-doc-0.0.4 annotated-types-0.7.0 anyio-4.13.0 apscheduler-3.11.2 argon2-cffi-25.1.0 argon2-cffi-bindings-25.1.0 asyncpg-0.31.0 certifi-2026.5.20 cffi-2.0.0 click-8.4.1 cryptography-48.0.0 fastapi-0.136.3 greenlet-3.5.1 h11-0.16.0 httpcore-1.0.9 httptools-0.8.0 httpx-0.28.1 idna-3.18 minio-7.2.20 pycparser-3.0 pycryptodome-3.23.0 pydantic-2.13.4 pydantic-core-2.46.4 python-dotenv-1.2.2 python-multipart-0.0.32 pytz-2026.2 pyyaml-6.0.3 sqlalchemy-2.0.50 starlette-1.2.1 typing-extensions-4.15.0 typing-inspection-0.4.2 tzlocal-5.3.1 urllib3-2.7.0 uvicorn-0.49.0 uvloop-0.22.1 watchfiles-1.2.0 websockets-16.0
+[91mWARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager, possibly rendering your system unusable. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv. Use the --root-user-action option if you know what you are doing and want to suppress this warning.
+[0m[91m
+[notice] A new release of pip is available: 25.0.1 -> 26.1.2
+[notice] To update, run: pip install --upgrade pip
+[0m ---> Removed intermediate container 63dcb2048d3c
+ ---> 084eedf5fbb9
+Step 6/9 : WORKDIR /app
+ ---> Running in 0d1846b1cdc2
+ ---> Removed intermediate container 0d1846b1cdc2
+ ---> 3361b492ec09
+Step 7/9 : COPY entrypoint.sh /entrypoint.sh
+ ---> 722a74eeb6ca
+Step 8/9 : RUN chmod +x /entrypoint.sh
+ ---> Running in a449f4364050
+ ---> Removed intermediate container a449f4364050
+ ---> 6a02de7a810f
+Step 9/9 : ENTRYPOINT ["/entrypoint.sh"]
+ ---> Running in e7a7f4e3f935
+ ---> Removed intermediate container e7a7f4e3f935
+ ---> c8119d0e1eb5
+Successfully built c8119d0e1eb5
+Successfully tagged internal/demo-meeting-form-demo-backend:sha9a385567378f23933128c6ce8896bafee1271d85
+Build completed successfully at 2026-06-08T08:32:56.419899
