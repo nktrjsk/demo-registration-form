@@ -6,6 +6,13 @@ deployments:
     context: demo
     relative_path: demo/backend
     stage: ''
+  backend-demo-dev:
+    active: true
+    automation_name: backend
+    checksum: 6a6ae5b898281cbd1854bf7974c0c6cb84342b1f
+    context: demo
+    relative_path: demo/backend
+    stage: dev
   backend-demo-staging:
     active: true
     automation_name: backend
