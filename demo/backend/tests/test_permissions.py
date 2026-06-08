@@ -191,7 +191,32 @@ def test_admin_only_endpoints_require_admin(make_client):
 
 
 def test_user_can_edit_own_entry(make_client):
-    """Sanity: any user can edit their own /my-entry without admin role."""
+    """Sanity: any user can edit their own /my-entry without admin role,
+    so long as they don't try to mutate attendance (admin-only)."""
+    _reset()
+    try:
+        meeting_id, project_id = _seed_meeting_with_project()
+        with make_client(BOB, admin=False) as bob:
+            r = bob.put(
+                f"/internal/meeting/{meeting_id}/my-entry",
+                json={
+                    "project_entries": [
+                        {"project_id": project_id, "description": "my notes"}
+                    ],
+                },
+            )
+            assert r.status_code == 200
+            assert r.json()["user_email"] == BOB
+            assert r.json()["project_entries"] == [
+                {"project_id": project_id, "description": "my notes"}
+            ]
+    finally:
+        _reset()
+
+
+def test_non_admin_cannot_set_attending_via_my_entry(make_client):
+    """REQ-007 update: attendance is admin-only. A non-admin PUT to
+    /my-entry that includes `attending` is rejected with 403."""
     _reset()
     try:
         meeting_id, _ = _seed_meeting_with_project()
@@ -200,8 +225,50 @@ def test_user_can_edit_own_entry(make_client):
                 f"/internal/meeting/{meeting_id}/my-entry",
                 json={"attending": True, "project_entries": []},
             )
+            assert r.status_code == 403, r.text
+    finally:
+        _reset()
+
+
+def test_admin_can_set_attending_via_own_my_entry(make_client):
+    """Admins are still allowed to set their own attendance via /my-entry."""
+    _reset()
+    try:
+        meeting_id, _ = _seed_meeting_with_project()
+        with make_client(ALICE, admin=True) as admin:
+            r = admin.put(
+                f"/internal/meeting/{meeting_id}/my-entry",
+                json={"attending": True, "project_entries": []},
+            )
             assert r.status_code == 200
-            assert r.json()["user_email"] == BOB
+            assert r.json()["attending"] is True
+    finally:
+        _reset()
+
+
+def test_admin_set_attending_persists_when_user_updates_projects(make_client):
+    """End-to-end: admin marks Bob attending; Bob then writes project notes
+    (without sending attending). Bob's attendance must stay True."""
+    _reset()
+    try:
+        meeting_id, project_id = _seed_meeting_with_project()
+        with make_client(ALICE, admin=True) as admin:
+            r = admin.put(
+                f"/internal/meeting/{meeting_id}/entries/{BOB}",
+                json={"attending": True, "project_entries": []},
+            )
+            assert r.status_code == 200
+
+        with make_client(BOB, admin=False) as bob:
+            r = bob.put(
+                f"/internal/meeting/{meeting_id}/my-entry",
+                json={
+                    "project_entries": [
+                        {"project_id": project_id, "description": "wrote it up"}
+                    ],
+                },
+            )
+            assert r.status_code == 200
             assert r.json()["attending"] is True
     finally:
         _reset()

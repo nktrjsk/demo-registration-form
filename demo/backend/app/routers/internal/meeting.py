@@ -425,6 +425,9 @@ async def _apply_entry_update(
     if meeting is None:
         raise HTTPException(status_code=404, detail="Meeting not found")
 
+    # attending is admin-only — non-admin callers must not include the key.
+    # When absent, keep the existing value (default False on new rows).
+    attending_provided = "attending" in payload
     attending = bool(payload.get("attending", False))
     raw_entries = payload.get("project_entries", []) or []
 
@@ -450,11 +453,11 @@ async def _apply_entry_update(
         entry = MeetingEntry(
             meeting_instance_id=meeting_id,
             user_email=user_email,
-            attending=attending,
+            attending=attending if attending_provided else False,
         )
         db.add(entry)
         await db.flush()
-    else:
+    elif attending_provided:
         entry.attending = attending
 
     existing = (
@@ -508,6 +511,10 @@ async def put_my_entry(
     user_email = get_email_from_request(request)
     if not user_email:
         raise HTTPException(status_code=400, detail="OIDC session has no email claim")
+    if "attending" in payload and not is_admin_claims(request.state.claims):
+        raise HTTPException(
+            status_code=403, detail="Only admins can change attendance"
+        )
     entry, project_entries = await _apply_entry_update(db, meeting_id, user_email, payload)
     return {"user_email": user_email, **_entry_to_dict(entry, project_entries)}
 

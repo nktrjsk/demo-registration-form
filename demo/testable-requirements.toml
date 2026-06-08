@@ -19,7 +19,7 @@ status = "pass"
 [[requirement]]
 id = "REQ-004"
 parent = ""
-description = "The internal-frontend uses OIDC to identify the signed-in user by email and presents them a form for the current Demo meeting where they can record (a) their own attendance, (b) one or more projects they worked on, and (c) a free-text description for each project."
+description = "The internal-frontend uses OIDC to identify the signed-in user by email and presents them a form for the current Demo meeting where they can record one or more projects they worked on and a free-text description for each project. Attendance is set by an admin only (see REQ-007) and shown to the user as a read-only status."
 status = "pass"
 
 [[requirement]]
@@ -37,7 +37,7 @@ status = "pass"
 [[requirement]]
 id = "REQ-007"
 parent = ""
-description = "Each user can only create/edit their own attendance and their own project entries. An admin role can edit any user's attendance and entries, and can change schedule and other settings."
+description = "Attendance is admin-only: only an admin can mark or change a user's attendance. Each user can create/edit their own project entries; an admin can edit any user's entries and can change schedule and other settings."
 status = "pass"
 
 [[requirement]]
@@ -103,7 +103,7 @@ status = "pass"
 [[requirement]]
 id = "AI-018"
 parent = "REQ-004"
-description = "The form has a control letting the user mark themselves as attending or not attending the current Demo meeting."
+description = "A non-admin user submitting an \"attending\" value via PUT /internal/meeting/{id}/my-entry is rejected with 403; the form must not expose an attendance control to non-admins."
 status = "pass"
 
 [[requirement]]
@@ -163,7 +163,7 @@ status = "pass"
 [[requirement]]
 id = "AI-028"
 parent = "REQ-007"
-description = "A non-admin user is rejected (API returns 403, UI hides the controls) when attempting to edit another user's attendance or project entries."
+description = "A non-admin user is rejected (API returns 403, UI hides the controls) when attempting to edit another user's attendance or project entries, OR their own attendance (attendance is now admin-only)."
 status = "pass"
 
 [[requirement]]
@@ -249,3 +249,21 @@ id = "REQ-042"
 parent = "REQ-036"
 description = "Any signed-in user can DELETE /internal/projects/{id}; deletion cascades to all of the project's ProjectEntry rows and ProjectSubscription rows."
 status = "pass"
+
+[[requirement]]
+id = "AI-043"
+parent = "REQ-007"
+description = "A non-admin user can still PUT /internal/meeting/{id}/my-entry with only project_entries (no \"attending\" key) and the request succeeds (200); attendance remains at whatever the admin last set it to (default False)."
+status = "proposed"
+
+[[requirement]]
+id = "AI-044"
+parent = "REQ-007"
+description = "After an admin sets a user U to attending=True via PUT /internal/meeting/{id}/entries/{U}, a subsequent PUT /internal/meeting/{id}/my-entry by U (without \"attending\") preserves attending=True."
+status = "proposed"
+
+[[requirement]]
+id = "AI-045"
+parent = "REQ-004"
+description = "A non-admin user opening the meeting form sees their attendance status as a read-only label (no checkbox), sourced from the roster."
+status = "proposed"

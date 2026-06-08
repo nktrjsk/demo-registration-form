@@ -42,6 +42,7 @@
   "form.meetingDate": "Meeting date",
   "form.yourEmail": "Your email",
   "form.attending": "I'll be attending this Demo",
+  "form.attendanceLabel": "Attendance (set by admin)",
   "form.projects": "Projects",
   "form.noProjects": "No projects added for this meeting yet.",
   "form.leader": "Leader",

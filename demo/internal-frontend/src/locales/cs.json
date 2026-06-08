@@ -42,6 +42,7 @@
   "form.meetingDate": "Datum dema",
   "form.yourEmail": "Tvůj e-mail",
   "form.attending": "Půjdu na demo",
+  "form.attendanceLabel": "Účast (nastavuje admin)",
   "form.projects": "Projekty",
   "form.noProjects": "K tomuto demu zatím nejsou přidány žádné projekty.",
   "form.leader": "Vedoucí",

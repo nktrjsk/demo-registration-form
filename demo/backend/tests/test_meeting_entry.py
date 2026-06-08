@@ -1,7 +1,7 @@
 """Tests for the user meeting-form endpoints (REQ-004 / AI-017..021).
 
 - AI-017: GET .../my-entry returns the user's email from the OIDC session.
-- AI-018: attendance toggle is persisted via PUT.
+- AI-018: attendance is admin-only; a non-admin PUTting `attending` is rejected.
 - AI-019: user can select one or more projects (project_entries list).
 - AI-020: descriptions are stored per project per user.
 - AI-021: reopening (re-GET) returns the previously submitted values.
@@ -120,43 +120,62 @@ def test_current_meeting_returns_latest_summary(user_client):
         _reset_all()
 
 
-def test_attendance_toggle_is_persisted(user_client):
-    """AI-018: attendance is recorded and survives reload."""
+def test_non_admin_cannot_set_own_attendance(user_client):
+    """AI-018: attendance is admin-only — a non-admin PUTting attending
+    via /my-entry is rejected with 403, even for their own row."""
     _reset_all()
     try:
         meeting_id, _, _ = _seed_meeting_with_projects()
-        # Mark attending=True.
         r = user_client.put(
             f"/internal/meeting/{meeting_id}/my-entry",
             json={"attending": True, "project_entries": []},
         )
-        assert r.status_code == 200, r.text
-        assert r.json()["attending"] is True
+        assert r.status_code == 403, r.text
 
-        # GET reflects the change.
-        r = user_client.get(f"/internal/meeting/{meeting_id}/my-entry")
-        assert r.json()["attending"] is True
-
-        # Toggle back to False — also persisted.
+        # Same for attending=False — any presence of the field is rejected.
         r = user_client.put(
             f"/internal/meeting/{meeting_id}/my-entry",
             json={"attending": False, "project_entries": []},
         )
-        assert r.status_code == 200
-        assert r.json()["attending"] is False
+        assert r.status_code == 403
+    finally:
+        _reset_all()
+
+
+def test_non_admin_can_submit_project_entries_without_attending(user_client):
+    """A non-admin must still be able to record project entries — the PUT
+    is accepted as long as `attending` is omitted; attendance is left to
+    its current value (False on the first save)."""
+    _reset_all()
+    try:
+        meeting_id, p1, _ = _seed_meeting_with_projects()
+        r = user_client.put(
+            f"/internal/meeting/{meeting_id}/my-entry",
+            json={
+                "project_entries": [
+                    {"project_id": p1, "description": "wrote up CETIN"},
+                ],
+            },
+        )
+        assert r.status_code == 200, r.text
+        data = r.json()
+        assert data["attending"] is False
+        assert data["project_entries"] == [
+            {"project_id": p1, "description": "wrote up CETIN"}
+        ]
     finally:
         _reset_all()
 
 
 def test_select_multiple_projects_with_descriptions(user_client):
-    """AI-019 + AI-020: multi-select with per-project description."""
+    """AI-019 + AI-020: multi-select with per-project description.
+    Non-admin user — attending is omitted (admin-only)."""
     _reset_all()
     try:
         meeting_id, p1, p2 = _seed_meeting_with_projects()
         r = user_client.put(
             f"/internal/meeting/{meeting_id}/my-entry",
             json={
-                "attending": True,
                 "project_entries": [
                     {"project_id": p1, "description": "Power consumption — PE"},
                     {"project_id": p2, "description": "Medin onboarding doc"},
@@ -165,7 +184,6 @@ def test_select_multiple_projects_with_descriptions(user_client):
         )
         assert r.status_code == 200, r.text
         data = r.json()
-        assert data["attending"] is True
         entries = {pe["project_id"]: pe["description"] for pe in data["project_entries"]}
         assert entries == {
             p1: "Power consumption — PE",
@@ -183,7 +201,6 @@ def test_reopening_returns_previously_submitted_values(user_client):
         user_client.put(
             f"/internal/meeting/{meeting_id}/my-entry",
             json={
-                "attending": True,
                 "project_entries": [
                     {"project_id": p1, "description": "Initial sketch"},
                 ],
@@ -192,7 +209,6 @@ def test_reopening_returns_previously_submitted_values(user_client):
         r = user_client.get(f"/internal/meeting/{meeting_id}/my-entry")
         data = r.json()
         assert data["user_email"] == TEST_EMAIL
-        assert data["attending"] is True
         assert data["project_entries"] == [
             {"project_id": p1, "description": "Initial sketch"}
         ]
@@ -208,7 +224,6 @@ def test_put_rejects_foreign_project_id(user_client):
         r = user_client.put(
             f"/internal/meeting/{meeting_id}/my-entry",
             json={
-                "attending": True,
                 "project_entries": [
                     {"project_id": 999999, "description": "nope"},
                 ],

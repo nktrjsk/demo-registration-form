@@ -135,6 +135,15 @@ export function MeetingForm({ isAdmin }: MeetingFormProps = {}) {
     return map
   }, [subscribed, extraProjects, searchResults])
 
+  // Non-admin users see a read-only attendance status sourced from the roster
+  // (which carries the 3-state yes/no/no_response). The own /my-entry payload
+  // can't distinguish "not attending" from "no row yet" on its own.
+  const selfStatus: 'yes' | 'no' | 'no_response' = useMemo(() => {
+    if (!entry || !roster) return 'no_response'
+    const row = roster.find(r => r.email === entry.user_email)
+    return row?.status ?? 'no_response'
+  }, [entry, roster])
+
   const visibleProjects = useMemo(() => {
     const out: MeetingProject[] = []
     const seen = new Set<number>()
@@ -270,20 +279,24 @@ export function MeetingForm({ isAdmin }: MeetingFormProps = {}) {
     const sameValues = sameLength && draftKeys.every(
       k => persistedEntries[Number(k)] === entries[Number(k)],
     )
-    const dirty = attending !== persisted.attending || !sameLength || !sameValues
+    const attendingChanged = isAdmin && attending !== persisted.attending
+    const dirty = attendingChanged || !sameLength || !sameValues
     if (!dirty) return
 
     saveInFlightRef.current = true
     setSaving(true)
     setError(null)
     try {
-      const updated = await backend.put<MyEntry>(`/meeting/${m.id}/my-entry`, {
-        attending,
+      // Attendance is admin-only — non-admin callers must omit the field
+      // (the backend would reject the PUT with 403 otherwise).
+      const body: { attending?: boolean; project_entries: { project_id: number; description: string }[] } = {
         project_entries: Object.entries(entries).map(([pid, desc]) => ({
           project_id: parseInt(pid, 10),
           description: desc,
         })),
-      })
+      }
+      if (isAdmin) body.attending = attending
+      const updated = await backend.put<MyEntry>(`/meeting/${m.id}/my-entry`, body)
       setEntry(updated)
       setSavedAt(new Date())
       // Auto-subscribed projects should now appear in the subscriptions list,
@@ -341,14 +354,23 @@ export function MeetingForm({ isAdmin }: MeetingFormProps = {}) {
         <strong data-testid="meeting-form-email">{entry.user_email}</strong>
       </p>
 
-      <label className="block">
-        <input
-          type="checkbox"
-          checked={draftAttending}
-          onChange={e => onAttendingChange(e.target.checked)}
-        />{' '}
-        {t('form.attending')}
-      </label>
+      {isAdmin ? (
+        <label className="block">
+          <input
+            type="checkbox"
+            checked={draftAttending}
+            onChange={e => onAttendingChange(e.target.checked)}
+          />{' '}
+          {t('form.attending')}
+        </label>
+      ) : (
+        <p className="block muted" data-testid="meeting-form-attendance">
+          {t('form.attendanceLabel')}:{' '}
+          <span className={`roster-status roster-status--${selfStatus}`}>
+            {t(`roster.status.${selfStatus}`)}
+          </span>
+        </p>
+      )}
 
       <h3>{t('form.myProjects')}</h3>
       {visibleProjects.length === 0 ? (
