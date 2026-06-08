@@ -1,0 +1,8 @@
+[deployment]
+id = "cda6a43c-420a-411d-beb1-8e755d927a86"
+image = "internal/demo-meeting-form-demo-internal-frontend:shaff19929f41f3c3a34d4098aa7d1394bb60b3ac98"
+
+[expose_to]
+dev = ["/admin"]
+staging = ["/admin"]
+production = ["/admin"]
