@@ -1,0 +1,10 @@
+[deployment]
+id = "ed9161ea-12f1-45fd-b5d2-c411c0cadef1"
+image = "internal/demo-meeting-form-demo-backend:sha9a385567378f23933128c6ce8896bafee1271d85"
+expose = true
+
+[services.postgres]
+enabled=true
+
+[services.minio]
+enabled=true
