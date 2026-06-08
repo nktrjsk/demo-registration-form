@@ -10,7 +10,7 @@ services:
       BITSWAN_DEPLOYMENT_CONTEXT: demo-wt-demo-live-dev
       BITSWAN_DEPLOYMENT_ID: backend-wt-demo-demo-live-dev
       BITSWAN_DEPLOY_CHECKSUM: live-dev
-      BITSWAN_DEPLOY_TIME: '2026-06-08T16:14:23.714761Z'
+      BITSWAN_DEPLOY_TIME: '2026-06-08T16:14:41.035457Z'
       BITSWAN_GITOPS_DOMAIN: nikita-sandbox.bswn.io
       BITSWAN_URL_TEMPLATE: https://demo-meeting-form-{name}-0f13-live-dev.nikita-sandbox.bswn.io
       BITSWAN_WORKSPACE_NAME: demo-meeting-form
@@ -50,7 +50,7 @@ services:
       BITSWAN_DEPLOYMENT_CONTEXT: demo-dev
       BITSWAN_DEPLOYMENT_ID: backend-demo-dev
       BITSWAN_DEPLOY_CHECKSUM: a58c69500688789300bec1d97e284a441f3dbdca
-      BITSWAN_DEPLOY_TIME: '2026-06-08T16:14:23.250346Z'
+      BITSWAN_DEPLOY_TIME: '2026-06-08T16:14:40.523200Z'
       BITSWAN_GITOPS_DOMAIN: nikita-sandbox.bswn.io
       BITSWAN_URL_PREFIX: https://demo-meeting-form-
       BITSWAN_URL_SUFFIX: .nikita-sandbox.bswn.io
@@ -93,7 +93,7 @@ services:
       BITSWAN_DEPLOYMENT_CONTEXT: demo
       BITSWAN_DEPLOYMENT_ID: backend-demo
       BITSWAN_DEPLOY_CHECKSUM: ddfd054c3428a4ed3e5732de60f5b8041b413874
-      BITSWAN_DEPLOY_TIME: '2026-06-08T16:14:23.055057Z'
+      BITSWAN_DEPLOY_TIME: '2026-06-08T16:14:40.314099Z'
       BITSWAN_GITOPS_DOMAIN: nikita-sandbox.bswn.io
       BITSWAN_URL_PREFIX: https://demo-meeting-form-
       BITSWAN_URL_SUFFIX: .nikita-sandbox.bswn.io
@@ -136,7 +136,7 @@ services:
       BITSWAN_DEPLOYMENT_CONTEXT: demo-staging
       BITSWAN_DEPLOYMENT_ID: backend-demo-staging
       BITSWAN_DEPLOY_CHECKSUM: ddfd054c3428a4ed3e5732de60f5b8041b413874
-      BITSWAN_DEPLOY_TIME: '2026-06-08T16:14:23.443138Z'
+      BITSWAN_DEPLOY_TIME: '2026-06-08T16:14:40.787289Z'
       BITSWAN_GITOPS_DOMAIN: nikita-sandbox.bswn.io
       BITSWAN_URL_PREFIX: https://demo-meeting-form-
       BITSWAN_URL_SUFFIX: .nikita-sandbox.bswn.io
@@ -179,7 +179,7 @@ services:
       BITSWAN_DEPLOYMENT_CONTEXT: demo-wt-demo-new-live-dev
       BITSWAN_DEPLOYMENT_ID: backend-wt-demo-new-demo-live-dev
       BITSWAN_DEPLOY_CHECKSUM: live-dev
-      BITSWAN_DEPLOY_TIME: '2026-06-08T16:14:23.874166Z'
+      BITSWAN_DEPLOY_TIME: '2026-06-08T16:14:41.193095Z'
       BITSWAN_GITOPS_DOMAIN: nikita-sandbox.bswn.io
       BITSWAN_URL_PREFIX: https://demo-meeting-form-
       BITSWAN_URL_SUFFIX: .nikita-sandbox.bswn.io
@@ -219,7 +219,7 @@ services:
       BITSWAN_DEPLOYMENT_CONTEXT: demo-wt-demo-live-dev
       BITSWAN_DEPLOYMENT_ID: internal-frontend-wt-demo-demo-live-dev
       BITSWAN_DEPLOY_CHECKSUM: live-dev
-      BITSWAN_DEPLOY_TIME: '2026-06-08T16:14:25.700082Z'
+      BITSWAN_DEPLOY_TIME: '2026-06-08T16:14:42.584005Z'
       BITSWAN_GITOPS_DOMAIN: nikita-sandbox.bswn.io
       BITSWAN_URL_TEMPLATE: https://demo-meeting-form-{name}-0f13-live-dev.nikita-sandbox.bswn.io
       BITSWAN_WORKSPACE_NAME: demo-meeting-form
@@ -247,65 +247,6 @@ services:
     volumes:
     - /root/.config/bitswan/certauthorities:/usr/local/share/ca-certificates/custom:ro
     - /root/.config/bitswan/workspaces/demo-meeting-form/workspace/worktrees/demo/demo/internal-frontend:/opt/pipelines:ro
-  demo-meeting-form-internal-frontend-2a97-dev:
-    container_name: demo-meeting-form-internal-frontend-2a97-dev
-    environment:
-      BITSWAN_ALLOWED_GROUP: /NikitaPlay
-      BITSWAN_AUTOMATION_STAGE: dev
-      BITSWAN_AUTOMATION_URL: https://demo-meeting-form-internal-frontend-2a97-dev.nikita-sandbox.bswn.io
-      BITSWAN_DEPLOYMENT_CONTEXT: demo-dev
-      BITSWAN_DEPLOYMENT_ID: internal-frontend-demo-dev
-      BITSWAN_DEPLOY_CHECKSUM: 998f8a55266426b66eca3e9fdb6be54cb848f541
-      BITSWAN_DEPLOY_TIME: '2026-06-08T16:14:24.640803Z'
-      BITSWAN_GITOPS_DOMAIN: nikita-sandbox.bswn.io
-      BITSWAN_URL_PREFIX: https://demo-meeting-form-
-      BITSWAN_URL_SUFFIX: .nikita-sandbox.bswn.io
-      BITSWAN_URL_TEMPLATE: https://demo-meeting-form-{name}-2a97-dev.nikita-sandbox.bswn.io
-      BITSWAN_WORKSPACE_NAME: demo-meeting-form
-      KEYCLOAK_ISSUER_URL: https://keycloak.bitswan.ai/realms/master
-      KEYCLOAK_REALM: master
-      KEYCLOAK_URL: https://keycloak.bitswan.ai
-      OAUTH2_PROXY_ALLOWED_GROUPS: /NikitaPlay/admin
-      OAUTH2_PROXY_CLIENT_ID: workspace-008e5dc9-ad56-422b-9b7a-38c709e6ebba-internal-frontend-demo-dev-client
-      OAUTH2_PROXY_CLIENT_SECRET: fd2foRPI6B4mBOrhkCScxhbCaTz3gVgZ
-      OAUTH2_PROXY_CODE_CHALLENGE_METHOD: S256
-      OAUTH2_PROXY_COOKIE_REFRESH: 14m
-      OAUTH2_PROXY_COOKIE_SECRET: nqxxrX0JXVzuSyVpRIzNCy44WtR0sUWK
-      OAUTH2_PROXY_EMAIL_DOMAINS: '*'
-      OAUTH2_PROXY_HTTP_ADDRESS: 0.0.0.0:9999
-      OAUTH2_PROXY_OIDC_GROUPS_CLAIM: group_membership
-      OAUTH2_PROXY_OIDC_ISSUER_URL: https://keycloak.bitswan.ai/realms/master
-      OAUTH2_PROXY_PASS_ACCESS_TOKEN: 'true'
-      OAUTH2_PROXY_PROVIDER: keycloak-oidc
-      OAUTH2_PROXY_REDIRECT_URL: https://demo-meeting-form-internal-frontend-2a97-dev.nikita-sandbox.bswn.io/oauth2/callback
-      OAUTH2_PROXY_SCOPE: openid email profile
-      OAUTH2_PROXY_SET_XAUTHREQUEST: 'true'
-      OAUTH2_PROXY_SKIP_PROVIDER_BUTTON: 'true'
-      OAUTH2_PROXY_UPSTREAMS: http://127.0.0.1:8080
-      OAUTH_ENABLED: 'true'
-      UPDATE_CA_CERTIFICATES: 'true'
-    image: internal/demo-meeting-form-demo-internal-frontend:shaff19929f41f3c3a34d4098aa7d1394bb60b3ac98
-    labels:
-      gitops.automation_name: internal-frontend
-      gitops.certs.enabled: 'true'
-      gitops.context: demo
-      gitops.deployment_id: internal-frontend-demo-dev
-      gitops.intended_exposed: 'true'
-      gitops.oauth2.enabled: 'true'
-      gitops.stage: dev
-      gitops.workspace: demo-meeting-form
-    networks:
-      bitswan_network:
-        aliases:
-        - demo-meeting-form-internal-frontend-2a97-dev.nikita-sandbox.bswn.io
-    restart: always
-    ulimits:
-      nofile:
-        hard: 65536
-        soft: 65536
-    volumes:
-    - /root/.config/bitswan/certauthorities:/usr/local/share/ca-certificates/custom:ro
-    - /root/.config/bitswan/workspaces/demo-meeting-form/gitops/998f8a55266426b66eca3e9fdb6be54cb848f541:/app/:ro
   demo-meeting-form-internal-frontend-2a97-production:
     container_name: demo-meeting-form-internal-frontend-2a97-production
     environment:
@@ -315,7 +256,7 @@ services:
       BITSWAN_DEPLOYMENT_CONTEXT: demo
       BITSWAN_DEPLOYMENT_ID: internal-frontend-demo
       BITSWAN_DEPLOY_CHECKSUM: 80a574ca70a320e749f5d3a3ffcece16a22fcc60
-      BITSWAN_DEPLOY_TIME: '2026-06-08T16:14:24.103833Z'
+      BITSWAN_DEPLOY_TIME: '2026-06-08T16:14:41.468662Z'
       BITSWAN_GITOPS_DOMAIN: nikita-sandbox.bswn.io
       BITSWAN_URL_PREFIX: https://demo-meeting-form-
       BITSWAN_URL_SUFFIX: .nikita-sandbox.bswn.io
@@ -374,7 +315,7 @@ services:
       BITSWAN_DEPLOYMENT_CONTEXT: demo-staging
       BITSWAN_DEPLOYMENT_ID: internal-frontend-demo-staging
       BITSWAN_DEPLOY_CHECKSUM: 80a574ca70a320e749f5d3a3ffcece16a22fcc60
-      BITSWAN_DEPLOY_TIME: '2026-06-08T16:14:25.173362Z'
+      BITSWAN_DEPLOY_TIME: '2026-06-08T16:14:42.027583Z'
       BITSWAN_GITOPS_DOMAIN: nikita-sandbox.bswn.io
       BITSWAN_URL_PREFIX: https://demo-meeting-form-
       BITSWAN_URL_SUFFIX: .nikita-sandbox.bswn.io
@@ -433,7 +374,7 @@ services:
       BITSWAN_DEPLOYMENT_CONTEXT: demo-wt-demo-new-live-dev
       BITSWAN_DEPLOYMENT_ID: internal-frontend-wt-demo-new-demo-live-dev
       BITSWAN_DEPLOY_CHECKSUM: live-dev
-      BITSWAN_DEPLOY_TIME: '2026-06-08T16:14:25.855936Z'
+      BITSWAN_DEPLOY_TIME: '2026-06-08T16:14:42.740729Z'
       BITSWAN_GITOPS_DOMAIN: nikita-sandbox.bswn.io
       BITSWAN_URL_PREFIX: https://demo-meeting-form-
       BITSWAN_URL_SUFFIX: .nikita-sandbox.bswn.io
