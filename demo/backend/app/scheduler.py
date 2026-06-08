@@ -22,10 +22,17 @@ def is_disabled() -> bool:
 
 
 async def _daily_tick() -> None:
+    now = now_local()
     async with async_session() as session:
-        result = await create_if_demo_day(now_local(), session)
+        result = await create_if_demo_day(now, session)
     if result is not None:
-        logger.info("Auto-created Demo meeting for %s", result.isoformat())
+        logger.info("Daily tick: auto-created Demo meeting for %s", result.isoformat())
+    else:
+        logger.info(
+            "Daily tick: %s (weekday=%d) is not a demo day, no instance created",
+            now.date().isoformat(),
+            now.weekday(),
+        )
 
 
 async def catch_up_today(now: datetime | None = None) -> None:
@@ -33,12 +40,19 @@ async def catch_up_today(now: datetime | None = None) -> None:
     cron trigger does not backfill missed firings, so a restart past 00:00
     on a demo day would otherwise leave the day with no instance."""
     if is_disabled():
+        logger.info("Startup backfill skipped: BITSWAN_DISABLE_SCHEDULER=1")
         return
     when = now if now is not None else now_local()
     async with async_session() as session:
         result = await create_if_demo_day(when, session)
     if result is not None:
         logger.info("Startup backfill: ensured Demo meeting for %s", result.isoformat())
+    else:
+        logger.info(
+            "Startup backfill: %s (weekday=%d) is not a demo day, no instance created",
+            when.date().isoformat(),
+            when.weekday(),
+        )
 
 
 def start() -> None:

@@ -10,6 +10,10 @@ from app import minio_client, scheduler as auto_scheduler
 from app.routers.internal import router as internal_router
 from app.routers.public import router as public_router
 
+# uvicorn configures only its own loggers; without this, `app.*` log calls
+# (scheduler/auth/etc.) propagate to a handler-less root and are dropped.
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
+
 logger = logging.getLogger(__name__)
 app = FastAPI()
 
