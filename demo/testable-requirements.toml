@@ -267,3 +267,15 @@ id = "AI-045"
 parent = "REQ-004"
 description = "A non-admin user opening the meeting form sees their attendance status as a read-only label (no checkbox), sourced from the roster."
 status = "proposed"
+
+[[requirement]]
+id = "REQ-046"
+parent = ""
+description = "The main meeting page is structured as an Attendance section (top) and a Demo list section below it. The demo list is a flat ordered list of every demo registered for the current meeting (one row per user-project pair), showing project name, presenter display name, and the demo description. Each user can edit and delete their own demos inline (autosaved); admins can edit anyone's demos and can drag rows to reorder the reading order. The order is persisted server-side and visible to everyone."
+status = "pending"
+
+[[requirement]]
+id = "REQ-047"
+parent = ""
+description = "User-facing terminology is 'demo' rather than 'note': the description placeholder reads 'Describe what you are going to demo' (Czech: 'Popiš, co budeš na demu předvádět'); the main list is titled 'Demo list' (Czech: 'Seznam dem'); the '+ Add demo' control replaces the prior project search/create UI for the current user. Database column/table names may stay as-is."
+status = "pending"

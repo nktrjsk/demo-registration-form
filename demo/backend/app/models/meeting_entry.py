@@ -29,7 +29,7 @@ class MeetingEntry(Base):
 
 
 class ProjectEntry(Base):
-    """One user's free-text note on one project at one meeting."""
+    """One demo registered by a user against one project at one meeting."""
 
     __tablename__ = "project_entries"
     __table_args__ = (
@@ -46,3 +46,6 @@ class ProjectEntry(Base):
         ForeignKey("projects.id", ondelete="CASCADE"), nullable=False
     )
     description: Mapped[str] = mapped_column(Text, nullable=False, default="")
+    # Host's reading order for the demo list. Default 0; ties broken by id
+    # so newly-created demos appear after previously-ordered ones.
+    order_index: Mapped[int] = mapped_column(Integer, nullable=False, default=0)

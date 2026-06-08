@@ -926,6 +926,141 @@ label {
   gap: 0.4rem;
 }
 
+.self-badge {
+  color: var(--text-muted);
+  font-weight: 400;
+  font-size: 0.85rem;
+}
+
+/* --- Demo list ------------------------------------------------------------- */
+
+.attendance-section + .demo-list-section,
+.demo-list-section {
+  margin-top: 0;
+}
+
+.demo-list {
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0 0.75rem;
+  counter-reset: demo;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.demo-row {
+  display: flex;
+  align-items: stretch;
+  gap: 0.6rem;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  transition: background 80ms ease, border-color 80ms ease;
+}
+
+.demo-row--drop-target {
+  border-color: var(--accent, #4f8df7);
+  background: color-mix(in srgb, var(--accent, #4f8df7) 8%, var(--surface));
+}
+
+.demo-row--dragging {
+  opacity: 0.5;
+}
+
+.demo-row__lead {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  min-width: 1.75rem;
+  user-select: none;
+  color: var(--text-muted);
+}
+
+.demo-row__handle {
+  cursor: grab;
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.demo-row__handle:active {
+  cursor: grabbing;
+}
+
+.demo-row__number {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.demo-row__body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.demo-row__head {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.demo-row__project {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.demo-row__presenter {
+  color: var(--text-secondary, var(--text-muted));
+  font-size: 0.9rem;
+}
+
+.demo-row__description {
+  margin: 0.2rem 0 0;
+  width: 100%;
+  resize: vertical;
+}
+
+.demo-row__description--readonly {
+  color: var(--text);
+  white-space: pre-wrap;
+}
+
+.demo-row__meta {
+  min-height: 1.1em;
+  font-size: 0.8rem;
+}
+
+.demo-row__delete {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.1rem;
+  padding: 0 0.2rem;
+  cursor: pointer;
+  align-self: flex-start;
+}
+
+.demo-row__delete:hover {
+  color: var(--danger, #d33);
+}
+
+.add-demo {
+  margin-top: 0.5rem;
+  padding: 0.75rem;
+  border: 1px dashed var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+}
+
+.add-demo-toggle {
+  margin-top: 0.5rem;
+}
+
 /* --- Footer ---------------------------------------------------------------- */
 
 .powered-by {

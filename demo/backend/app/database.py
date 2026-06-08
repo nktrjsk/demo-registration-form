@@ -1,5 +1,6 @@
 import os
 
+from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase
 
@@ -26,6 +27,13 @@ async def init_db():
 
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+        # In-place additive migrations for live deployments where
+        # create_all has already run against an older schema. PostgreSQL's
+        # ADD COLUMN IF NOT EXISTS makes each statement idempotent.
+        await conn.execute(text(
+            "ALTER TABLE project_entries "
+            "ADD COLUMN IF NOT EXISTS order_index INTEGER NOT NULL DEFAULT 0"
+        ))
 
 
 async def shutdown_db():

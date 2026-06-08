@@ -136,6 +136,19 @@ export interface ProjectEntry {
   description: string
 }
 
+// A single demo as surfaced by GET /meeting/{id}/demos — flat row with
+// the presenter and project already joined in for the host's reading
+// view. `id` is the underlying ProjectEntry.id and is what /demos/order
+// expects.
+export interface Demo {
+  id: number
+  order_index: number
+  project: MeetingProject
+  user_email: string
+  presenter_display_name: string
+  description: string
+}
+
 export interface MyEntry {
   user_email: string
   attending: boolean

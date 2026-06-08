@@ -2,7 +2,7 @@
 from datetime import date, datetime, time
 
 from fastapi import Body, Depends, HTTPException
-from sqlalchemy import desc, or_, select
+from sqlalchemy import desc, func, or_, select
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -474,6 +474,16 @@ async def _apply_entry_update(
         for pid_existing, pe in existing_by_pid.items():
             if pid_existing not in incoming:
                 await db.delete(pe)
+        # New demos get appended to the end of the meeting's reading
+        # order: take max(order_index)+1, scoped to the same meeting via
+        # the MeetingEntry join.
+        next_order_q = (
+            select(func.coalesce(func.max(ProjectEntry.order_index), -1) + 1)
+            .select_from(ProjectEntry)
+            .join(MeetingEntry, MeetingEntry.id == ProjectEntry.meeting_entry_id)
+            .where(MeetingEntry.meeting_instance_id == meeting_id)
+        )
+        next_order = int((await db.execute(next_order_q)).scalar_one() or 0)
         for pid, desc_text in incoming.items():
             if pid in existing_by_pid:
                 existing_by_pid[pid].description = desc_text
@@ -483,8 +493,10 @@ async def _apply_entry_update(
                         meeting_entry_id=entry.id,
                         project_id=pid,
                         description=desc_text,
+                        order_index=next_order,
                     )
                 )
+                next_order += 1
 
         for pid in incoming:
             await _ensure_subscription(db, user_email, pid)
@@ -619,6 +631,124 @@ async def get_attendees(meeting_id: int, db: AsyncSession = Depends(get_db)):
             for (email, display_name) in roster
         ]
     }
+
+
+# --- Demo list (flat ordered list, used by the host while running the meeting) ---
+
+
+@router.get("/meeting/{meeting_id}/demos")
+async def get_demos(meeting_id: int, db: AsyncSession = Depends(get_db)):
+    """Flat list of every demo registered for this meeting, in reading
+    order (order_index asc, id asc as tiebreaker). One row per
+    (user, project) demo. Includes the presenter's display_name so the
+    host can read off the list without joining client-side."""
+    meeting = await db.get(MeetingInstance, meeting_id)
+    if meeting is None:
+        raise HTTPException(status_code=404, detail="Meeting not found")
+
+    rows = (
+        await db.execute(
+            select(ProjectEntry, MeetingEntry.user_email)
+            .join(MeetingEntry, MeetingEntry.id == ProjectEntry.meeting_entry_id)
+            .where(MeetingEntry.meeting_instance_id == meeting_id)
+            .order_by(ProjectEntry.order_index, ProjectEntry.id)
+        )
+    ).all()
+    if not rows:
+        return {"demos": []}
+
+    project_ids = list({pe.project_id for pe, _ in rows})
+    projects = (
+        await db.execute(select(Project).where(Project.id.in_(project_ids)))
+    ).scalars().all()
+    leader_ids = list({p.leader_person_id for p in projects})
+    persons = (
+        await db.execute(
+            select(Person).where(
+                Person.id.in_(leader_ids)
+                | Person.email.in_([email for _, email in rows])
+            )
+        )
+    ).scalars().all()
+    person_by_id = {p.id: p for p in persons}
+    person_by_email = {p.email: p for p in persons if p.email is not None}
+    project_by_id = {p.id: p for p in projects}
+
+    demos = []
+    for pe, user_email in rows:
+        proj = project_by_id[pe.project_id]
+        leader = person_by_id[proj.leader_person_id]
+        presenter = person_by_email.get(user_email)
+        demos.append({
+            "id": pe.id,
+            "order_index": pe.order_index,
+            "project": _project_to_dict(proj, leader),
+            "user_email": user_email,
+            "presenter_display_name": presenter.display_name if presenter else user_email,
+            "description": pe.description,
+        })
+    return {"demos": demos}
+
+
+@router.put(
+    "/meeting/{meeting_id}/demos/order",
+    dependencies=[Depends(require_admin)],
+)
+async def reorder_demos(
+    meeting_id: int,
+    payload: dict = Body(...),
+    db: AsyncSession = Depends(get_db),
+):
+    """Admin-only: persist the host's reading order. Body:
+       {"order": [demo_id, demo_id, ...]}
+
+    The listed demos get order_index 0..len-1 in the given sequence.
+    Any demo in this meeting that's missing from the list keeps a
+    deterministic place after them (sorted by existing order_index, id).
+    """
+    meeting = await db.get(MeetingInstance, meeting_id)
+    if meeting is None:
+        raise HTTPException(status_code=404, detail="Meeting not found")
+
+    raw_order = payload.get("order")
+    if not isinstance(raw_order, list):
+        raise HTTPException(status_code=422, detail="order must be a list of demo ids")
+    try:
+        wanted_ids = [int(x) for x in raw_order]
+    except (TypeError, ValueError):
+        raise HTTPException(status_code=422, detail="order ids must be ints")
+    if len(set(wanted_ids)) != len(wanted_ids):
+        raise HTTPException(status_code=422, detail="order ids must be unique")
+
+    rows = (
+        await db.execute(
+            select(ProjectEntry)
+            .join(MeetingEntry, MeetingEntry.id == ProjectEntry.meeting_entry_id)
+            .where(MeetingEntry.meeting_instance_id == meeting_id)
+            .order_by(ProjectEntry.order_index, ProjectEntry.id)
+        )
+    ).scalars().all()
+    by_id = {pe.id: pe for pe in rows}
+
+    unknown = [i for i in wanted_ids if i not in by_id]
+    if unknown:
+        raise HTTPException(
+            status_code=422, detail=f"demo ids not in this meeting: {unknown}"
+        )
+
+    listed: set[int] = set(wanted_ids)
+    for i, pe_id in enumerate(wanted_ids):
+        by_id[pe_id].order_index = i
+
+    tail_start = len(wanted_ids)
+    for pe in rows:
+        if pe.id in listed:
+            continue
+        pe.order_index = tail_start
+        tail_start += 1
+
+    await db.commit()
+    return {"updated": len(rows)}
 
 
 @router.get("/meeting/{meeting_id}/details")
