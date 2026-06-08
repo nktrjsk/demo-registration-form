@@ -34,6 +34,13 @@ deployments:
     context: demo
     relative_path: demo/internal-frontend
     stage: ''
+  internal-frontend-demo-dev:
+    active: true
+    automation_name: internal-frontend
+    checksum: 02b0f5ab3d6018066ceac61c167b66bc2bde0f4a
+    context: demo
+    relative_path: demo/internal-frontend
+    stage: dev
   internal-frontend-demo-staging:
     active: true
     automation_name: internal-frontend
